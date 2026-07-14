@@ -7,13 +7,13 @@
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- ApexCharts para visualización de datos -->
+    <!-- ApexCharts para visualizaciones avanzadas -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <!-- FontAwesome para iconografía corporativa -->
+    <!-- FontAwesome para iconografía corporativa de BI -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SheetJS para lectura de Excel sin backend -->
+    <!-- SheetJS para procesamiento de datos offline -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-    <!-- html2pdf para generación de presentaciones ejecutivas -->
+    <!-- html2pdf para generación de presentaciones directas al directorio -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <script>
@@ -38,22 +38,22 @@
         .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
         .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
         
-        /* Estilos de Scrollbar */
+        /* Estilos personalizados para Scrollbar de tablas analíticas */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        /* Animaciones del Loader */
-        #loader { display: flex; position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
+        /* Animaciones para Loader de carga */
+        #loader { display: flex; position: fixed; inset: 0; background: rgba(255,255,255,0.95); z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #1e3a8a; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* Vistas Iniciales */
+        /* Control de estados de la UI */
         #dashboard-content { display: none; }
         #empty-state { display: none; }
 
-        /* Animaciones para Notificaciones Toast */
+        /* Animaciones Toasts de Notificación */
         @keyframes slideInRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
         @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
         .toast-enter { animation: slideInRight 0.3s ease-out forwards; }
@@ -62,16 +62,17 @@
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Contenedor de Toasts (Notificaciones) -->
+    <!-- Contenedor global de Toasts -->
     <div id="toast-container" class="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 pointer-events-none"></div>
 
-    <!-- Loader Pantalla Completa -->
+    <!-- Loader de conexión y parseo de datos -->
     <div id="loader">
         <div class="spinner mb-4"></div>
         <h2 class="text-xl font-bold text-primary">Conectando con Google Sheets...</h2>
-        <p class="text-slate-500 text-sm mt-2">Procesando inteligencia de negocio en tiempo real</p>
+        <p class="text-slate-500 text-sm mt-2">Descargando modelo financiero e inteligencia de negocio</p>
     </div>
 
+    <!-- Header Principal -->
     <header class="glass sticky top-0 z-50 border-b border-slate-200 px-6 py-4 flex flex-wrap gap-4 justify-between items-center">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-primary text-white rounded-lg flex items-center justify-center text-xl shadow-md">
@@ -79,38 +80,46 @@
             </div>
             <div>
                 <h1 class="text-xl font-bold text-slate-900 leading-tight">Inteligencia de Campañas</h1>
-                <p class="text-xs text-slate-500 font-medium">BI & Analítica Estratégica</p>
+                <p class="text-xs text-slate-500 font-medium">BI & Analítica Estratégica v2.5</p>
             </div>
         </div>
         
-        <!-- Controles Globales y Filtros -->
+        <!-- Filtros Globales y de Fecha -->
         <div class="flex flex-wrap gap-3 items-center bg-slate-50 p-2 rounded-lg border border-slate-200" id="global-controls">
             <div class="flex flex-col">
                 <label class="text-[10px] font-bold text-slate-500 uppercase px-1">Producto</label>
-                <select id="f-producto" class="text-sm bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary outline-none cursor-pointer"><option value="ALL">Todos</option></select>
+                <select id="f-producto" class="text-xs bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary outline-none cursor-pointer"><option value="ALL">Todos</option></select>
             </div>
             <div class="flex flex-col">
                 <label class="text-[10px] font-bold text-slate-500 uppercase px-1">Canal</label>
-                <select id="f-canal" class="text-sm bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary outline-none cursor-pointer"><option value="ALL">Todos</option></select>
+                <select id="f-canal" class="text-xs bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary outline-none cursor-pointer"><option value="ALL">Todos</option></select>
             </div>
             <div class="flex flex-col">
                 <label class="text-[10px] font-bold text-slate-500 uppercase px-1">Segmento</label>
-                <select id="f-segmento" class="text-sm bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary outline-none cursor-pointer"><option value="ALL">Todos</option></select>
+                <select id="f-segmento" class="text-xs bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary outline-none cursor-pointer"><option value="ALL">Todos</option></select>
+            </div>
+            <div class="flex flex-col">
+                <label class="text-[10px] font-bold text-slate-500 uppercase px-1">Desde</label>
+                <input type="date" id="f-start" class="text-xs bg-white border border-slate-300 rounded py-1 px-2 outline-none">
+            </div>
+            <div class="flex flex-col">
+                <label class="text-[10px] font-bold text-slate-500 uppercase px-1">Hasta</label>
+                <input type="date" id="f-end" class="text-xs bg-white border border-slate-300 rounded py-1 px-2 outline-none">
             </div>
             <div class="w-px h-8 bg-slate-300 mx-1 hidden sm:block"></div>
             
-            <!-- Acciones Estratégicas: Subir, Compartir, Exportar -->
+            <!-- Acciones de Distribución de Reporte -->
             <input type="file" id="fileUpload" accept=".xlsx, .xls" class="hidden">
             <button onclick="document.getElementById('fileUpload').click()" class="bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold px-3 py-2 rounded-md border border-slate-300 transition-colors flex items-center gap-2" title="Cargar base de datos local">
-                <i class="fa-solid fa-file-excel text-emerald-600"></i> <span class="hidden md:inline">Cargar Datos</span>
+                <i class="fa-solid fa-file-excel text-emerald-600"></i> <span class="hidden lg:inline">Cargar Datos</span>
             </button>
             
             <button onclick="shareDashboard()" class="bg-white hover:bg-blue-50 text-blue-600 text-xs font-bold px-3 py-2 rounded-md border border-blue-200 transition-colors flex items-center gap-2" title="Copiar enlace del reporte">
-                <i class="fa-solid fa-share-nodes"></i> <span class="hidden md:inline">Compartir</span>
+                <i class="fa-solid fa-share-nodes"></i> <span class="hidden lg:inline">Compartir</span>
             </button>
             
             <button onclick="exportToPDF()" class="bg-primary hover:bg-blue-800 text-white text-xs font-bold px-3 py-2 rounded-md border border-primary transition-colors flex items-center gap-2 shadow-sm" title="Descargar como Presentación (PDF)">
-                <i class="fa-solid fa-file-pdf"></i> <span class="hidden md:inline">Presentación</span>
+                <i class="fa-solid fa-file-pdf"></i> <span class="hidden lg:inline">Presentación</span>
             </button>
         </div>
     </header>
@@ -121,60 +130,59 @@
             <i class="fa-solid fa-database"></i>
         </div>
         <h2 class="text-2xl font-bold text-slate-700 mb-2">Esperando Origen de Datos</h2>
-        <p class="text-slate-500 max-w-md mx-auto mb-6">El enlace a Google Sheets falló o no tiene permisos. Por favor, carga tu extracto de la base de datos manualmente para generar el análisis.</p>
+        <p class="text-slate-500 max-w-md mx-auto mb-6">El enlace automático de Google Sheets no responde o no tiene permisos de lectura pública. Carga tu archivo local para iniciar el análisis.</p>
         <button onclick="document.getElementById('fileUpload').click()" class="bg-primary text-white font-bold px-6 py-3 rounded-lg transition-colors shadow-md hover:bg-blue-800">
             <i class="fa-solid fa-upload mr-2"></i> Subir Archivo Excel
         </button>
     </main>
 
-    <!-- Contenedor Principal (Objetivo del PDF) -->
+    <!-- Contenedor Principal (Soporta exportación a PDF) -->
     <div id="pdf-wrapper">
         <main id="dashboard-content" class="flex-1 p-6 max-w-[1600px] mx-auto w-full flex-col gap-6">
             
-            <!-- Encabezado exclusivo para el PDF (Oculto en web) -->
+            <!-- Encabezado de Reporte de Presentación (Oculto en Web) -->
             <div id="pdf-header" class="hidden mb-6 pb-4 border-b border-slate-200">
-                <h1 class="text-2xl font-bold text-primary">Reporte Estratégico de Campañas</h1>
+                <h1 class="text-2xl font-bold text-primary">Reporte de Inteligencia y Eficiencia Financiera</h1>
                 <p class="text-sm text-slate-500" id="pdf-date"></p>
             </div>
 
-            <!-- KPIs -->
+            <!-- Tarjetas de Indicadores Clave (KPIs) -->
             <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-6">
                 <div class="card p-5 relative overflow-hidden">
                     <div class="absolute top-0 right-0 p-4 opacity-10 text-primary text-5xl"><i class="fa-solid fa-paper-plane"></i></div>
                     <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Impacto Global</h3>
                     <div class="text-3xl font-bold text-slate-800" id="kpi-envios">0</div>
-                    <div class="mt-2 text-xs font-medium text-slate-500">Volumen procesado</div>
+                    <div class="mt-2 text-xs font-medium text-slate-500">Volumen total de envíos</div>
                 </div>
                 <div class="card p-5 relative overflow-hidden">
                     <div class="absolute top-0 right-0 p-4 opacity-10 text-accent text-5xl"><i class="fa-solid fa-users-rays"></i></div>
-                    <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Conversión Neta</h3>
+                    <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Clientes Activos</h3>
                     <div class="text-3xl font-bold text-slate-800" id="kpi-jugadores">0</div>
-                    <div class="mt-2 text-xs font-medium text-slate-500">Usuarios que accionaron</div>
+                    <div class="mt-2 text-xs font-medium text-slate-500">Transacciones / Clientes que jugaron</div>
                 </div>
                 <div class="card p-5 relative overflow-hidden border-l-4 border-l-accent">
                     <div class="absolute top-0 right-0 p-4 opacity-10 text-accent text-5xl"><i class="fa-solid fa-arrow-trend-up"></i></div>
-                    <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Tasa de Efectividad</h3>
+                    <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Tasa de Actividad</h3>
                     <div class="text-3xl font-bold text-accent" id="kpi-tasa">0.00%</div>
-                    <div class="mt-2 text-xs font-medium text-slate-500">KPI Principal del negocio</div>
+                    <div class="mt-2 text-xs font-medium text-slate-500">Efectividad de conversión neta</div>
                 </div>
                 
-                <!-- Nuevos KPIs Financieros -->
+                <!-- KPIs de Costeo y Rentabilidad -->
                 <div class="card p-5 relative overflow-hidden">
                     <div class="absolute top-0 right-0 p-4 opacity-10 text-amber-500 text-5xl"><i class="fa-solid fa-file-invoice-dollar"></i></div>
                     <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Costo Promedio Envío</h3>
                     <div class="text-3xl font-bold text-amber-600" id="kpi-costo-envio">S/ 0.00</div>
-                    <div class="mt-2 text-xs font-medium text-slate-500" id="kpi-inversion">Total: S/ 0.00</div>
+                    <div class="mt-2 text-xs font-medium text-slate-500" id="kpi-inversion">Inversión del filtro: S/ 0.00</div>
                 </div>
                 <div class="card p-5 relative overflow-hidden border-l-4 border-l-emerald-500">
                     <div class="absolute top-0 right-0 p-4 opacity-10 text-emerald-500 text-5xl"><i class="fa-solid fa-hand-holding-dollar"></i></div>
                     <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">CPA (Costo por Jugada)</h3>
                     <div class="text-3xl font-bold text-emerald-600" id="kpi-cpa">S/ 0.00</div>
-                    <div class="mt-2 text-xs font-medium text-slate-500">Eficiencia del gasto</div>
+                    <div class="mt-2 text-xs font-medium text-slate-500">Eficiencia por transacción</div>
                 </div>
-
                 <div class="card p-5 bg-gradient-to-br from-primary to-blue-700 text-white shadow-lg relative overflow-hidden">
                     <div class="absolute -bottom-4 -right-4 opacity-20 text-white text-7xl"><i class="fa-solid fa-trophy"></i></div>
-                    <h3 class="text-sm font-medium text-blue-200 uppercase tracking-wider mb-1">Top Performer</h3>
+                    <h3 class="text-sm font-medium text-blue-200 uppercase tracking-wider mb-1">Producto Estrella</h3>
                     <div class="text-2xl font-bold mb-1 truncate relative z-10" id="kpi-mix-name">-</div>
                     <div class="flex items-center gap-2 mt-1 bg-white/20 rounded px-2 py-1 w-fit relative z-10">
                         <i class="fa-solid fa-star text-yellow-300 text-xs"></i>
@@ -183,38 +191,37 @@
                 </div>
             </section>
 
-            <!-- Insights de Diagnóstico Semántico -->
+            <!-- Insights de Diagnóstico de Copy y Canales -->
             <section class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
                 <div class="card p-4 border-t-4 border-t-blue-500 bg-blue-50/30">
-                    <h4 class="text-xs font-bold text-blue-600 uppercase mb-1"><i class="fa-solid fa-tower-cell mr-1"></i> Canal Dominante</h4>
-                    <p class="text-sm text-slate-700 leading-tight" id="insight-canal">Analizando datos...</p>
+                    <h4 class="text-xs font-bold text-blue-600 uppercase mb-1"><i class="fa-solid fa-tower-cell mr-1"></i> Canal Core</h4>
+                    <p class="text-sm text-slate-700 leading-tight font-medium" id="insight-canal">Analizando canales...</p>
                 </div>
                 <div class="card p-4 border-t-4 border-t-emerald-500 bg-emerald-50/30">
-                    <h4 class="text-xs font-bold text-emerald-600 uppercase mb-1"><i class="fa-solid fa-box-open mr-1"></i> Producto Traccionador</h4>
-                    <p class="text-sm text-slate-700 leading-tight" id="insight-producto">Analizando datos...</p>
+                    <h4 class="text-xs font-bold text-emerald-600 uppercase mb-1"><i class="fa-solid fa-box-open mr-1"></i> Traccionador de Ventas</h4>
+                    <p class="text-sm text-slate-700 leading-tight font-medium" id="insight-producto">Analizando productos...</p>
                 </div>
                 <div class="card p-4 border-t-4 border-t-purple-500 bg-purple-50/30">
-                    <h4 class="text-xs font-bold text-purple-600 uppercase mb-1"><i class="fa-solid fa-users-viewfinder mr-1"></i> Segmento Ideal</h4>
-                    <p class="text-sm text-slate-700 leading-tight" id="insight-segmento">Analizando datos...</p>
+                    <h4 class="text-xs font-bold text-purple-600 uppercase mb-1"><i class="fa-solid fa-users-viewfinder mr-1"></i> Segmento Responsivo</h4>
+                    <p class="text-sm text-slate-700 leading-tight font-medium" id="insight-segmento">Analizando audiencias...</p>
                 </div>
                 <div class="card p-4 border-t-4 border-t-warning bg-amber-50/30">
-                    <h4 class="text-xs font-bold text-amber-600 uppercase mb-1"><i class="fa-solid fa-comment-dots mr-1"></i> Gatillo de Copy (NLP)</h4>
-                    <p class="text-sm text-slate-700 leading-tight" id="insight-keyword">Analizando semántica...</p>
+                    <h4 class="text-xs font-bold text-amber-600 uppercase mb-1"><i class="fa-solid fa-comment-dots mr-1"></i> Disparador Semántico (NLP)</h4>
+                    <p class="text-sm text-slate-700 leading-tight font-medium" id="insight-keyword">Analizando triggers de copy...</p>
                 </div>
             </section>
 
-            <!-- Gráficos Interactivos -->
+            <!-- Gráficos de Rendimiento y Conversión -->
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <!-- Gráfico Dinámico (Agrupador) -->
                 <div class="card p-6 flex flex-col">
                     <div class="flex justify-between items-center mb-4">
                         <div>
                             <h2 class="text-lg font-bold text-slate-800">Eficiencia Comparativa</h2>
-                            <p class="text-xs text-slate-500">Conversión ordenada descendentemente</p>
+                            <p class="text-xs text-slate-500">Efectividad ordenada descendentemente</p>
                         </div>
                         <div class="flex items-center gap-2 bg-slate-100 p-1 rounded border border-slate-200 pdf-hide">
                             <span class="text-xs font-bold text-slate-500 px-2">Eje:</span>
-                            <select id="chart-dimension" class="text-sm bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary font-medium outline-none cursor-pointer">
+                            <select id="chart-dimension" class="text-xs bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary font-medium outline-none cursor-pointer">
                                 <option value="canal">Canales</option>
                                 <option value="producto">Productos</option>
                                 <option value="segmento">Segmentos</option>
@@ -225,19 +232,18 @@
                     <div id="chart-dynamic" class="w-full h-72"></div>
                 </div>
                 
-                <!-- Gráfico Evolutivo -->
                 <div class="card p-6 flex flex-col">
                     <div class="flex justify-between items-center mb-4">
                         <div>
-                            <h2 class="text-lg font-bold text-slate-800">Curva de Tendencia</h2>
-                            <p class="text-xs text-slate-500">Comportamiento temporal de la audiencia</p>
+                            <h2 class="text-lg font-bold text-slate-800">Tendencia de Respuesta</h2>
+                            <p class="text-xs text-slate-500">Histórico de tasa de actividad en el tiempo</p>
                         </div>
                         <div class="flex items-center gap-2 bg-slate-100 p-1 rounded border border-slate-200 pdf-hide">
-                            <span class="text-xs font-bold text-slate-500 px-2">Periodo:</span>
-                            <select id="chart-aggregation" class="text-sm bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary font-medium outline-none cursor-pointer">
+                            <span class="text-xs font-bold text-slate-500 px-2">Intervalo:</span>
+                            <select id="chart-aggregation" class="text-xs bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary font-medium outline-none cursor-pointer">
                                 <option value="day">Diario</option>
                                 <option value="week">Semanal</option>
-                                <option value="month">Mensual</option>
+                                <option value="month" selected>Mensual</option>
                             </select>
                         </div>
                     </div>
@@ -245,30 +251,99 @@
                 </div>
             </section>
 
-            <!-- Tabla Completa de Resultados -->
+            <!-- NUEVO MÓDULO: Evolutivo e Histórico de Inversión y Costos -->
+            <section class="card p-6 flex flex-col mb-6">
+                <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Evolutivo e Histórico de CPA (Eficiencia)</h2>
+                        <p class="text-xs text-slate-500">Monitoreo temporal del Costo por Transacción / Jugada (S/.)</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-3 bg-slate-50 p-2 rounded-lg border border-slate-200 pdf-hide">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase">Ámbito:</span>
+                            <select id="chart-cost-filter-mode" class="text-xs bg-white border border-slate-300 rounded py-1 px-1.5 focus:ring-primary font-medium outline-none cursor-pointer">
+                                <option value="filtered">Filtros Activos</option>
+                                <option value="unfiltered">Total Base (Sin Filtros)</option>
+                            </select>
+                        </div>
+                        <div class="w-px h-5 bg-slate-300"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase">Desglose:</span>
+                            <select id="chart-cost-dimension" class="text-xs bg-white border border-slate-300 rounded py-1 px-1.5 focus:ring-primary font-medium outline-none cursor-pointer">
+                                <option value="total">Total Consolidado</option>
+                                <option value="canal">Por Canales</option>
+                                <option value="producto">Por Productos</option>
+                                <option value="segmento">Por Segmentos</option>
+                            </select>
+                        </div>
+                        <div class="w-px h-5 bg-slate-300"></div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase">Frecuencia:</span>
+                            <select id="chart-cost-aggregation" class="text-xs bg-white border border-slate-300 rounded py-1 px-1.5 focus:ring-primary font-medium outline-none cursor-pointer">
+                                <option value="day">Diario</option>
+                                <option value="week">Semanal</option>
+                                <option value="month" selected>Mensual</option>
+                                <option value="year">Anual</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <div id="chart-cost-container" class="lg:col-span-3 w-full h-80">
+                        <div id="chart-cost-evolution" class="w-full h-full"></div>
+                    </div>
+                    <!-- Panel Lateral Informativo de Costos -->
+                    <div class="flex flex-col justify-between gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <div>
+                            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Auditoría Financiera</h3>
+                            <div class="mb-4">
+                                <span class="text-xs text-slate-500 block">CPA Promedio (Período)</span>
+                                <span class="text-2xl font-bold text-emerald-600" id="cost-kpi-total">S/ 0.00</span>
+                            </div>
+                            <div class="mb-4">
+                                <span class="text-xs text-slate-500 block">Pico Máximo de CPA</span>
+                                <span class="text-xl font-bold text-danger" id="cost-kpi-max">S/ 0.00</span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-500 block">CPA Global (Base Histórica)</span>
+                                <span class="text-sm font-semibold text-primary block" id="cost-kpi-unfiltered">S/ 0.00</span>
+                            </div>
+                        </div>
+                        <div class="pt-4 border-t border-slate-200">
+                            <div class="flex items-center gap-2 text-[10px] text-slate-500 font-medium">
+                                <i class="fa-solid fa-circle-info text-blue-500 text-sm"></i>
+                                <span>Ratios ponderados. Picos altos indican campañas con gasto sin conversión.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Matriz de Resultados -->
             <section class="card p-0 flex flex-col" id="audit-table-section">
-                <div class="bg-slate-50 p-4 border-b border-slate-200 flex justify-between items-center">
+                <div class="bg-slate-50 p-4 border-b border-slate-200 flex justify-between items-center flex-wrap gap-2">
                     <h2 class="text-md font-bold text-slate-800 flex items-center gap-2">
-                        <i class="fa-solid fa-list-check text-primary"></i> Matriz de Auditoría de Resultados
+                        <i class="fa-solid fa-list-check text-primary"></i> Matriz de Auditoría y Eficiencia Financiera
                     </h2>
-                    <span class="text-xs font-medium text-slate-500 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm pdf-hide">Filtros aplicados en vivo</span>
+                    <span class="text-xs font-medium text-slate-500 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm pdf-hide">Filtros dinámicos activos</span>
                 </div>
                 <div class="p-0 overflow-auto max-h-[500px]" id="table-scroll-container">
                     <table class="w-full text-left border-collapse text-sm whitespace-nowrap">
                         <thead class="bg-white sticky top-0 shadow-sm z-10">
                             <tr>
                                 <th class="py-3 px-4 font-bold text-slate-600 border-b">Fecha</th>
-                                <th class="py-3 px-4 font-bold text-slate-600 border-b">Detalle de Campaña</th>
+                                <th class="py-3 px-4 font-bold text-slate-600 border-b">Campaña / Mensaje</th>
                                 <th class="py-3 px-4 font-bold text-slate-600 border-b">Producto</th>
                                 <th class="py-3 px-4 font-bold text-slate-600 border-b">Canal</th>
+                                <th class="py-3 px-4 font-bold text-slate-600 border-b">Segmento</th>
                                 <th class="py-3 px-4 font-bold text-slate-600 border-b text-right">Volumen</th>
-                                <th class="py-3 px-4 font-bold text-slate-600 border-b text-right text-amber-600">Inv. (S/)</th>
-                                <th class="py-3 px-4 font-bold text-slate-600 border-b text-right text-emerald-600">CPA</th>
-                                <th class="py-3 px-4 font-bold text-slate-600 border-b text-right text-accent">Tasa Conv.</th>
+                                <th class="py-3 px-4 font-bold text-slate-600 border-b text-right text-amber-600">Inversión</th>
+                                <th class="py-3 px-4 font-bold text-slate-600 border-b text-right text-emerald-600">CPA (S/)</th>
+                                <th class="py-3 px-4 font-bold text-slate-600 border-b text-right text-accent">Tasa Actividad</th>
                             </tr>
                         </thead>
                         <tbody id="mix-table-body" class="divide-y divide-slate-100 bg-slate-50/30">
-                            <!-- Generado dinámicamente -->
+                            <!-- Inyectado mediante JS -->
                         </tbody>
                     </table>
                 </div>
@@ -277,13 +352,11 @@
     </div>
 
     <script>
-        // --- 1. SISTEMA DE NOTIFICACIONES (TOASTS) ---
-        // Reemplazo corporativo para el uso de alert()
+        // --- 1. NOTIFICACIONES TOAST (UI PREMIUM) ---
         function showToast(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
             
-            // Configurar estilos según el tipo
             let colors = type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' :
                          type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
                          'bg-blue-50 border-blue-200 text-blue-800';
@@ -300,7 +373,6 @@
             
             container.appendChild(toast);
 
-            // Eliminar después de 4 segundos
             setTimeout(() => {
                 toast.classList.remove('toast-enter');
                 toast.classList.add('toast-exit');
@@ -308,80 +380,71 @@
             }, 4000);
         }
 
-        // --- 2. FUNCIONES DE COMPARTIR Y EXPORTAR (Nuevos Requerimientos) ---
-        
-        // Copiar URL al portapapeles de forma segura (sin fallos de iframe/CORS)
+        // --- 2. ACCIONES DE COMPARTIR Y EXPORTAR ---
         function shareDashboard() {
             try {
                 const tempInput = document.createElement("input");
-                tempInput.value = window.location.href; // En un SaaS real, aquí podríamos anexar los parámetros de filtro ?prod=X
+                tempInput.value = window.location.href;
                 document.body.appendChild(tempInput);
                 tempInput.select();
-                document.execCommand("copy"); // Fallback robusto
+                document.execCommand("copy");
                 document.body.removeChild(tempInput);
-                showToast("¡Enlace del reporte copiado al portapapeles!", "success");
+                showToast("Enlace copiado de forma segura al portapapeles", "success");
             } catch (err) {
-                showToast("No se pudo copiar el enlace.", "error");
+                showToast("Fallo al copiar enlace", "error");
             }
         }
 
-        // Generar Presentación Ejecutiva en PDF
         function exportToPDF() {
-            showToast("Generando presentación PDF. Por favor, espera...", "info");
+            showToast("Procesando gráficos y compilando PDF corporativo...", "info");
             
             const element = document.getElementById('pdf-wrapper');
-            const dateStr = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' });
+            const dateStr = new Date().toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
             
-            // Preparar UI para impresión
             document.getElementById('pdf-header').classList.remove('hidden');
             document.getElementById('pdf-date').innerText = `Extraído el: ${dateStr}`;
             
-            // Quitar el scroll temporalmente de la tabla para que se imprima completa (o al menos lo que encaje)
             const tableContainer = document.getElementById('table-scroll-container');
             const originalMaxHeight = tableContainer.style.maxHeight;
             tableContainer.style.maxHeight = 'none';
 
-            // Ocultar elementos interactivos no relevantes en PDF
             document.querySelectorAll('.pdf-hide').forEach(el => el.style.display = 'none');
 
-            // Configuración de html2pdf
             const opt = {
-                margin:       0.2, // Pulgadas
-                filename:     `BI_Reporte_Campañas_${new Date().getTime()}.pdf`,
+                margin:       0.2,
+                filename:     `BI_Reporte_Financiero_Campañas_${new Date().getTime()}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true, logging: false },
-                jsPDF:        { unit: 'in', format: 'tabloid', orientation: 'landscape' } // Formato ancho para analítica
+                jsPDF:        { unit: 'in', format: 'tabloid', orientation: 'landscape' }
             };
 
-            // Ejecutar promesa
             html2pdf().set(opt).from(element).save().then(() => {
-                // Restaurar UI tras imprimir
                 document.getElementById('pdf-header').classList.add('hidden');
                 tableContainer.style.maxHeight = originalMaxHeight;
                 document.querySelectorAll('.pdf-hide').forEach(el => el.style.display = '');
-                
-                showToast("Presentación descargada exitosamente.", "success");
+                showToast("Reporte descargado exitosamente", "success");
             }).catch(err => {
                 console.error(err);
-                showToast("Hubo un error al generar el PDF.", "error");
-                
-                // Restaurar UI en caso de error
+                showToast("Fallo al compilar el PDF", "error");
                 document.getElementById('pdf-header').classList.add('hidden');
                 tableContainer.style.maxHeight = originalMaxHeight;
                 document.querySelectorAll('.pdf-hide').forEach(el => el.style.display = '');
             });
         }
 
-        // --- 3. NÚCLEO ANALÍTICO DE NEGOCIO ---
+        // --- STREAMING_CHUNK: Creando el motor analítico ---
+        // --- 3. NÚCLEO ANALÍTICO ---
         window.allData = [];
         window.filteredData = [];
+        
         let dynamicChart = null;
         let evolutionChart = null;
+        let costEvolutionChart = null;
 
-        // Utilidades de formato
         const formatNumber = (num) => new Intl.NumberFormat('es-PE').format(num);
         const formatPercent = (num) => (num * 100).toFixed(2) + '%';
         const formatMoney = (num) => 'S/ ' + num.toLocaleString('es-PE', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        
         const formatDate = (dateString) => {
             if(!dateString) return '-';
             const d = new Date(dateString);
@@ -399,7 +462,7 @@
             
             try {
                 const response = await fetch(GSHEETS_URL);
-                if (!response.ok) throw new Error("Acceso denegado o enlace roto");
+                if (!response.ok) throw new Error("Acceso denegado o URL no disponible");
                 const arrayBuffer = await response.arrayBuffer();
                 
                 const workbook = XLSX.read(arrayBuffer, {type: 'array', cellDates: true});
@@ -407,16 +470,16 @@
                 const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {defval: ""});
                 
                 processAndStoreData(jsonData);
-                showToast("Datos sincronizados en tiempo real.", "success");
+                showToast("Modelo sincronizado en tiempo real con la nube", "success");
             } catch (error) {
-                console.warn("GSheets Falló, activando fallback local:", error);
+                console.warn("GSheets Falló, activando modo Offline:", error);
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('empty-state').style.display = 'flex';
-                showToast("Modo Offline: Carga tu Excel manualmente.", "warning");
+                showToast("Modo sin conexión. Cargue su archivo manual.", "warning");
             }
         }
 
-        // Carga Manual (Resiliencia)
+        // --- STREAMING_CHUNK: Registrando el cargador local de archivos ---
         document.getElementById('fileUpload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -433,56 +496,73 @@
                     let sheetName = workbook.SheetNames.includes('Reporte_Nuevo') ? 'Reporte_Nuevo' : workbook.SheetNames[0];
                     const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {defval: ""});
                     processAndStoreData(jsonData);
-                    showToast("Archivo local procesado correctamente.", "success");
+                    showToast("Base de datos local procesada exitosamente", "success");
                 } catch (error) {
                     document.getElementById('loader').style.display = 'none';
                     document.getElementById('empty-state').style.display = 'flex';
-                    showToast("Error leyendo el archivo Excel.", "error");
+                    showToast("Fallo al estructurar el Excel", "error");
                 }
             };
             reader.readAsArrayBuffer(file);
         });
 
+        // --- STREAMING_CHUNK: Limpieza y Costeo de Datos ---
         function processAndStoreData(json) {
             window.allData = [];
             let pSet = new Set(), cSet = new Set(), sSet = new Set();
+            let minD = '2099-12-31', maxD = '2000-01-01';
 
             json.forEach(row => {
                 let envios = parseFloat(row['Total de envíos']) || 0;
                 let jugadores = parseFloat(row['Clientes que jugaron']) || 0;
-                let producto = (row['Producto'] || 'No clasificado').toString().trim();
+                let producto = (row['Producto'] || 'Sin Clasificar').toString().trim();
                 let canal = (row['TIPO'] || row['Tipo'] || 'Otro').toString().trim();
                 let segmento = (row['Segmento'] || 'General').toString().trim();
                 let mensaje = (row['Campaña.1'] || row['Mensaje'] || row['Campaña'] || '').toString().trim();
                 let campañaName = (row['Campaña'] || 'Sin Nombre').toString().trim();
                 
                 let fechaRaw = row['Fecha de Envío'] || row['Fecha'];
-                let fecha = (fechaRaw instanceof Date) ? fechaRaw.toISOString().split('T')[0] : 
-                            (!isNaN(new Date(fechaRaw))) ? new Date(fechaRaw).toISOString().split('T')[0] : '';
+                let fecha = '';
+                if (fechaRaw instanceof Date) {
+                    fecha = fechaRaw.toISOString().split('T')[0];
+                } else if (fechaRaw) {
+                    let d = new Date(fechaRaw);
+                    if (!isNaN(d)) fecha = d.toISOString().split('T')[0];
+                }
 
+                // Cálculo de costos unitarios según modelo de negocio
                 let unitCost = 0;
                 let cLower = canal.toLowerCase();
-                // Asignación de tarifas del modelo de negocio
-                if (cLower.includes('sms')) unitCost = 0.10;
-                else if (cLower.includes('outbound') || cLower.includes('llamada') || cLower.includes('voz')) unitCost = 0.25;
-                
+                if (cLower.includes('sms')) {
+                    unitCost = 0.10;
+                } else if (cLower.includes('outbound') || cLower.includes('llamada') || cLower.includes('voz')) {
+                    unitCost = 0.25;
+                }
                 let costoTotal = envios * unitCost;
 
-                if (envios > 0) { // Ignorar ruido estadístico
+                if (envios > 0) {
                     window.allData.push({
                         producto, canal, segmento, mensaje, fecha, campaña: campañaName,
                         envios, jugadores, costo: costoTotal,
                         tasa: envios > 0 ? (jugadores / envios) : 0,
                         cpa: jugadores > 0 ? (costoTotal / jugadores) : costoTotal
                     });
-                    pSet.add(producto); cSet.add(canal); sSet.add(segmento);
+                    
+                    pSet.add(producto); 
+                    cSet.add(canal); 
+                    sSet.add(segmento);
+                    
+                    if (fecha) {
+                        if(fecha < minD) minD = fecha;
+                        if(fecha > maxD) maxD = fecha;
+                    }
                 }
             });
 
             if(window.allData.length === 0){
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('empty-state').style.display = 'flex';
-                showToast("El documento no contiene datos analizables.", "error");
+                showToast("El documento no posee registros analizables", "error");
                 return;
             }
 
@@ -491,47 +571,73 @@
                 el.innerHTML = '<option value="ALL">Todos</option>';
                 [...set].sort().forEach(item => el.innerHTML += `<option value="${item}">${item}</option>`);
             };
-            populate('f-producto', pSet); populate('f-canal', cSet); populate('f-segmento', sSet);
+            populate('f-producto', pSet); 
+            populate('f-canal', cSet); 
+            populate('f-segmento', sSet);
             
+            if(minD !== '2099-12-31' && maxD !== '2000-01-01') {
+                document.getElementById('f-start').value = minD;
+                document.getElementById('f-end').value = maxD;
+            }
+
             document.getElementById('loader').style.display = 'none';
             document.getElementById('dashboard-content').style.display = 'flex';
             
             applyFilters();
         }
 
+        // --- STREAMING_CHUNK: Aplicando lógica de filtros interactivos ---
         function applyFilters() {
             const fProd = document.getElementById('f-producto').value;
             const fCanal = document.getElementById('f-canal').value;
             const fSeg = document.getElementById('f-segmento').value;
+            const fStart = document.getElementById('f-start').value;
+            const fEnd = document.getElementById('f-end').value;
 
             window.filteredData = window.allData.filter(d => {
-                return (fProd === 'ALL' || d.producto === fProd) &&
-                       (fCanal === 'ALL' || d.canal === fCanal) &&
-                       (fSeg === 'ALL' || d.segmento === fSeg);
+                let match = true;
+                if (fProd !== 'ALL' && d.producto !== fProd) match = false;
+                if (fCanal !== 'ALL' && d.canal !== fCanal) match = false;
+                if (fSeg !== 'ALL' && d.segmento !== fSeg) match = false;
+                if (d.fecha) {
+                    if (fStart && d.fecha < fStart) match = false;
+                    if (fEnd && d.fecha > fEnd) match = false;
+                }
+                return match;
             });
 
             updateDashboardUI();
         }
 
-        ['f-producto', 'f-canal', 'f-segmento'].forEach(id => {
+        // Vinculación de eventos a filtros de la UI
+        ['f-producto', 'f-canal', 'f-segmento', 'f-start', 'f-end'].forEach(id => {
             document.getElementById(id).addEventListener('change', applyFilters);
         });
+
         document.getElementById('chart-dimension').addEventListener('change', renderDynamicChart);
         document.getElementById('chart-aggregation').addEventListener('change', renderEvolutionChart);
 
+        // Vinculación de eventos para el módulo de Costos
+        ['chart-cost-filter-mode', 'chart-cost-dimension', 'chart-cost-aggregation'].forEach(id => {
+            document.getElementById(id).addEventListener('change', renderCostEvolutionChart);
+        });
+
+        // --- STREAMING_CHUNK: Renderizando KPI e Insights semánticos ---
         function updateDashboardUI() {
             let tEnvios = 0, tJugadores = 0, tCosto = 0;
             const dictProd = {}, dictCanal = {}, dictSeg = {};
             
-            // NLP Básico (Semántica de Marketing)
+            // Motor semántico para textos publicitarios (NLP)
             const kwAnalysis = {
-                'Urgencia': { words: ['hoy', 'ahora', 'ya', 'solo', 'último'], e:0, j:0 },
-                'Incentivo': { words: ['gratis', 'regalo', 'bono', 'saldo'], e:0, j:0 },
-                'Aspiracional': { words: ['pozo', 'millones', 'gana', 'sueño'], e:0, j:0 },
+                'Urgencia/Tiempo': { words: ['hoy', 'ahora', 'ya', 'solo por', 'último'], e:0, j:0 },
+                'Regalo/Gratuidad': { words: ['gratis', 'regalo', 'bono', 'saldo'], e:0, j:0 },
+                'Premios de Pozo': { words: ['pozo', 'millonario', 'millones', 'acumulado'], e:0, j:0 }
             };
 
             window.filteredData.forEach(r => {
-                tEnvios += r.envios; tJugadores += r.jugadores; tCosto += r.costo;
+                tEnvios += r.envios; 
+                tJugadores += r.jugadores; 
+                tCosto += r.costo;
                 
                 if(!dictProd[r.producto]) dictProd[r.producto] = {e:0, j:0};
                 dictProd[r.producto].e += r.envios; dictProd[r.producto].j += r.jugadores;
@@ -550,7 +656,7 @@
                 }
             });
 
-            // Renderizado de KPIs
+            // Actualización de KPIs Principales
             document.getElementById('kpi-envios').innerText = formatNumber(tEnvios);
             document.getElementById('kpi-jugadores').innerText = formatNumber(tJugadores);
             document.getElementById('kpi-tasa').innerText = formatPercent(tEnvios > 0 ? (tJugadores/tEnvios) : 0);
@@ -560,18 +666,18 @@
             
             document.getElementById('kpi-costo-envio').innerText = formatMoney(costoPromedio);
             document.getElementById('kpi-cpa').innerText = formatMoney(cpaGlobal);
-            document.getElementById('kpi-inversion').innerText = `Total Inv.: ${formatMoney(tCosto)}`;
+            document.getElementById('kpi-inversion').innerText = `Total Inv: ${formatMoney(tCosto)}`;
 
             let bestProd = {n: 'N/A', r:0};
             for(let p in dictProd) {
-                let r = dictProd[p].e > 500 ? (dictProd[p].j/dictProd[p].e) : 0;
+                let r = dictProd[p].e > 300 ? (dictProd[p].j/dictProd[p].e) : 0;
                 if(r > bestProd.r) bestProd = {n: p, r: r};
             }
             document.getElementById('kpi-mix-name').innerText = bestProd.n;
             document.getElementById('kpi-mix-tasa').innerText = formatPercent(bestProd.r);
 
-            // Generador de Insights Ejecutivos
-            const getBest = (dict, minV = 500) => {
+            // Diagnósticos e Insights ejecutivos
+            const getBest = (dict, minV = 300) => {
                 let best = {n: '-', r: 0};
                 for(let k in dict) {
                     let r = dict[k].e > minV ? (dict[k].j/dict[k].e) : 0;
@@ -580,18 +686,46 @@
                 return best;
             }
             
-            let topC = getBest(dictCanal, 300), topS = getBest(dictSeg, 300), topK = getBest(kwAnalysis, 100);
+            let topC = getBest(dictCanal), topS = getBest(dictSeg), topK = getBest(kwAnalysis, 100);
 
-            document.getElementById('insight-canal').innerHTML = topC.r > 0 ? `El canal <b>${topC.n}</b> maxímiza la conversión (${formatPercent(topC.r)}). Sugiero enfocar pauta aquí.` : 'Muestra insuficiente.';
-            document.getElementById('insight-producto').innerHTML = bestProd.r > 0 ? `<b>${bestProd.n}</b> es el "Cash Cow" actual. Escalar este producto.` : 'Muestra insuficiente.';
-            document.getElementById('insight-segmento').innerHTML = topS.r > 0 ? `El público <b>${topS.n}</b> responde mejor (${formatPercent(topS.r)}). Evitar saturarlos.` : 'Muestra insuficiente.';
-            document.getElementById('insight-keyword').innerHTML = topK.r > 0 ? `Textos que denotan <b>${topK.n}</b> aumentan CTR al ${formatPercent(topK.r)}.` : 'Sin correlación fuerte.';
+            document.getElementById('insight-canal').innerHTML = topC.r > 0 ? `<b>${topC.n}</b> es el más eficiente en retención con un <b>${formatPercent(topC.r)}</b>.` : 'Muestra temporal insuficiente.';
+            document.getElementById('insight-producto').innerHTML = bestProd.r > 0 ? `<b>${bestProd.n}</b> destaca como motor estratégico principal de juego.` : 'Muestra temporal insuficiente.';
+            document.getElementById('insight-segmento').innerHTML = topS.r > 0 ? `El grupo <b>${topS.n}</b> es el más receptivo a impactos de pauta.` : 'Muestra temporal insuficiente.';
+            document.getElementById('insight-keyword').innerHTML = topK.r > 0 ? `Terminologías de <b>${topK.n}</b> elevan la tracción al <b>${formatPercent(topK.r)}</b>.` : 'Sin correlación fuerte.';
 
+            // Renderizar todos los gráficos de la solución
             renderDynamicChart();
             renderEvolutionChart();
+            renderCostEvolutionChart();
             renderMixTable();
         }
 
+        // --- STREAMING_CHUNK: Procesando agregador temporal para gráficos de tendencia ---
+        function getAggregatedDate(dateStr, interval) {
+            if (!dateStr) return 'Indet';
+            const dObj = new Date(dateStr);
+            if(isNaN(dObj)) return dateStr;
+            const y = dObj.getUTCFullYear();
+            const m = dObj.getUTCMonth() + 1;
+            const d = dObj.getUTCDate();
+            
+            const ms = m.toString().padStart(2, '0');
+            const ds = d.toString().padStart(2, '0');
+
+            switch (interval) {
+                case 'day': return `${y}-${ms}-${ds}`;
+                case 'week':
+                    const start = new Date(Date.UTC(y, 0, 1));
+                    const diff = (dObj - start) / 86400000;
+                    const w = Math.ceil((diff + start.getUTCDay() + 1) / 7);
+                    return `${y}-W${w.toString().padStart(2,'0')}`;
+                case 'month': return `${y}-${ms}`;
+                case 'year': return `${y}`;
+                default: return dateStr;
+            }
+        }
+
+        // --- STREAMING_CHUNK: Renderizando gráficos de conversión y embudo ---
         function renderDynamicChart() {
             const dim = document.getElementById('chart-dimension').value;
             const groupMap = {};
@@ -606,15 +740,15 @@
                 name: k, rate: groupMap[k].e > 0 ? (groupMap[k].j / groupMap[k].e * 100) : 0, vol: groupMap[k].e
             })).filter(i => i.vol > 10).sort((a, b) => b.rate - a.rate);
 
-            if (dim === 'campaña') sortedArr = sortedArr.slice(0, 10); // Resumir para legibilidad
+            if (dim === 'campaña') sortedArr = sortedArr.slice(0, 10);
 
             if(dynamicChart) dynamicChart.destroy();
 
             const options = {
-                series: [{ name: 'Conversión (%)', data: sortedArr.map(i => i.rate.toFixed(2)) }],
+                series: [{ name: 'Efectividad (%)', data: sortedArr.map(i => i.rate.toFixed(2)) }],
                 chart: { type: 'bar', height: '100%', toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
                 plotOptions: { bar: { borderRadius: 4, horizontal: true, distributed: true } },
-                colors: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#06b6d4'],
+                colors: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'],
                 dataLabels: { enabled: true, formatter: val => val + "%" },
                 xaxis: { categories: sortedArr.map(i => i.name.substring(0, 30)), labels: { show: false } },
                 legend: { show: false },
@@ -631,19 +765,9 @@
 
             window.filteredData.forEach(r => {
                 if(!r.fecha) return;
-                let dObj = new Date(r.fecha);
-                if(isNaN(dObj)) return;
-                
-                let key = r.fecha; // Dia
-                if(interval === 'week') {
-                    let w = Math.ceil(((dObj - new Date(dObj.getUTCFullYear(),0,1))/86400000 + new Date(dObj.getUTCFullYear(),0,1).getDay()+1)/7);
-                    key = `${dObj.getUTCFullYear()}-W${w}`;
-                } else if(interval === 'month') {
-                    key = `${dObj.getUTCFullYear()}-${String(dObj.getUTCMonth()+1).padStart(2,'0')}`;
-                }
-
-                if(!groupMap[key]) groupMap[key] = {e:0, j:0};
-                groupMap[key].e += r.envios; groupMap[key].j += r.jugadores;
+                let aggDate = getAggregatedDate(r.fecha, interval);
+                if(!groupMap[aggDate]) groupMap[aggDate] = {e:0, j:0};
+                groupMap[aggDate].e += r.envios; groupMap[aggDate].j += r.jugadores;
             });
 
             let sortedKeys = Object.keys(groupMap).sort();
@@ -651,7 +775,7 @@
             if(evolutionChart) evolutionChart.destroy();
 
             const options = {
-                series: [{ name: 'Efectividad (%)', data: sortedKeys.map(k => (groupMap[k].j / groupMap[k].e * 100).toFixed(2)) }],
+                series: [{ name: 'Conversión Promedio', data: sortedKeys.map(k => (groupMap[k].j / groupMap[k].e * 100).toFixed(2)) }],
                 chart: { type: 'area', height: '100%', toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
                 colors: ['#1e3a8a'],
                 fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05, stops: [0, 100] } },
@@ -665,28 +789,161 @@
             evolutionChart.render();
         }
 
+        // --- STREAMING_CHUNK: NUEVO MOTOR: Renderizado dinámico de Evolución de Costos ---
+        // --- 4. RENDERIZADO DEL EVOLUTIVO DE COSTOS (NUEVO MÓDULO) ---
+        function renderCostEvolutionChart() {
+            const filterMode = document.getElementById('chart-cost-filter-mode').value;
+            const dim = document.getElementById('chart-cost-dimension').value;
+            const interval = document.getElementById('chart-cost-aggregation').value;
+
+            // Selección de datos meta (Con filtros activos o base de datos absoluta sin filtro)
+            const targetData = filterMode === 'filtered' ? window.filteredData : window.allData;
+
+            const dataMap = {}; 
+            const categoriesSet = new Set();
+            let totalPeriodCost = 0;
+            let totalPeriodPlayers = 0;
+            let maxPeriodCPAValue = 0;
+
+            targetData.forEach(r => {
+                if (!r.fecha) return;
+                let aggDate = getAggregatedDate(r.fecha, interval);
+                let catVal = (dim === 'total') ? 'CPA Consolidado' : (r[dim] || 'Desconocido');
+
+                categoriesSet.add(catVal);
+                totalPeriodCost += r.costo;
+                totalPeriodPlayers += r.jugadores;
+
+                if (!dataMap[aggDate]) {
+                    dataMap[aggDate] = {};
+                }
+                if (!dataMap[aggDate][catVal]) {
+                    dataMap[aggDate][catVal] = { c: 0, j: 0 };
+                }
+                dataMap[aggDate][catVal].c += r.costo;
+                dataMap[aggDate][catVal].j += r.jugadores;
+            });
+
+            // Costo acumulado y CPA histórico absoluto sin filtros
+            let globalUnfilteredCost = 0;
+            let globalUnfilteredPlayers = 0;
+            window.allData.forEach(r => {
+                globalUnfilteredCost += r.costo;
+                globalUnfilteredPlayers += r.jugadores;
+            });
+
+            let cpaPeriod = totalPeriodPlayers > 0 ? (totalPeriodCost / totalPeriodPlayers) : totalPeriodCost;
+            let cpaGlobalUnfiltered = globalUnfilteredPlayers > 0 ? (globalUnfilteredCost / globalUnfilteredPlayers) : globalUnfilteredCost;
+
+            // Actualización de KPIs en Panel Financiero Lateral
+            document.getElementById('cost-kpi-total').innerText = formatMoney(cpaPeriod);
+            document.getElementById('cost-kpi-unfiltered').innerText = formatMoney(cpaGlobalUnfiltered);
+
+            // Ordenamiento cronológico de las fechas de frecuencia
+            const sortedDates = Object.keys(dataMap).sort();
+            const uniqueCategories = Array.from(categoriesSet).sort();
+
+            // Armar series para ApexCharts calculando el CPA Ponderado
+            const series = uniqueCategories.map(cat => {
+                const dataPoints = sortedDates.map(dateKey => {
+                    const valObj = dataMap[dateKey][cat] || {c:0, j:0};
+                    // Si hubo costo pero 0 jugadores, el CPA se toma como el costo total (dinero perdido) para reflejar ineficiencia.
+                    let cpa = valObj.j > 0 ? (valObj.c / valObj.j) : valObj.c; 
+                    
+                    if (cpa > maxPeriodCPAValue) maxPeriodCPAValue = cpa;
+                    return parseFloat(cpa.toFixed(2));
+                });
+                return {
+                    name: cat,
+                    type: dim === 'total' ? 'area' : 'line', // Si es desglose, usa líneas para no apilar. Si es total, usa área.
+                    data: dataPoints
+                };
+            });
+
+            document.getElementById('cost-kpi-max').innerText = formatMoney(maxPeriodCPAValue);
+
+            if (costEvolutionChart) {
+                costEvolutionChart.destroy();
+            }
+
+            // Configuración del gráfico de CPA
+            const options = {
+                series: series,
+                chart: {
+                    height: '100%',
+                    stacked: false, // ¡Crítico! Nunca apilar promedios o ratios (CPA).
+                    toolbar: { show: false },
+                    fontFamily: 'Inter, sans-serif'
+                },
+                colors: dim === 'total' ? ['#10b981'] : ['#ef4444', '#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'],
+                fill: {
+                    type: dim === 'total' ? 'gradient' : 'solid',
+                    gradient: dim === 'total' ? { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.05, stops: [0, 100] } : undefined,
+                    opacity: dim === 'total' ? undefined : 1
+                },
+                dataLabels: { enabled: false },
+                stroke: { curve: 'smooth', width: dim === 'total' ? 2 : 3 },
+                xaxis: {
+                    categories: sortedDates,
+                    tooltip: { enabled: false },
+                    axisBorder: { show: false }
+                },
+                yaxis: {
+                    labels: {
+                        formatter: function(val) {
+                            return 'S/ ' + formatNumber(val);
+                        }
+                    }
+                },
+                tooltip: {
+                    y: {
+                        formatter: function(val) {
+                            return 'S/ ' + val.toLocaleString('es-PE', { minimumFractionDigits: 2 });
+                        }
+                    }
+                },
+                grid: {
+                    strokeDashArray: 4,
+                    borderColor: '#e2e8f0',
+                    padding: { left: 10, right: 20 }
+                },
+                legend: {
+                    position: 'top',
+                    horizontalAlign: 'left',
+                    offsetY: 0
+                },
+                markers: { size: dim === 'total' ? 0 : 4, hover: { size: 6 } }
+            };
+
+            costEvolutionChart = new ApexCharts(document.querySelector("#chart-cost-evolution"), options);
+            costEvolutionChart.render();
+        }
+
+        // --- STREAMING_CHUNK: Creando el listado estructurado de matriz de datos ---
         function renderMixTable() {
-            const sortedData = [...window.filteredData].sort((a,b) => b.tasa - a.tasa).slice(0, 100); // Top 100 para no saturar DOM/PDF
+            // Ordenamos la tabla de mayor a menor efectividad de conversión
+            const sortedData = [...window.filteredData].sort((a,b) => b.tasa - a.tasa).slice(0, 100);
             
             const tbody = document.getElementById('mix-table-body');
             if(sortedData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="py-8 text-center text-slate-400">Sin datos para estos filtros.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-slate-400 font-medium">No se detectan registros válidos para los filtros aplicados.</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = sortedData.map(r => `
                 <tr class="hover:bg-white transition-colors">
-                    <td class="py-2 px-4 text-slate-500 text-xs">${formatDate(r.fecha)}</td>
-                    <td class="py-2 px-4">
+                    <td class="py-3 px-4 text-slate-500 text-xs font-semibold">${formatDate(r.fecha)}</td>
+                    <td class="py-3 px-4">
                         <div class="text-slate-800 font-semibold truncate max-w-[200px]" title="${r.campaña}">${r.campaña}</div>
                         <div class="text-slate-400 text-[10px] truncate max-w-[200px]" title="${r.mensaje}">${r.mensaje}</div>
                     </td>
-                    <td class="py-2 px-4 font-medium text-slate-700 text-xs">${r.producto}</td>
-                    <td class="py-2 px-4"><span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-[10px] font-bold border border-blue-100">${r.canal}</span></td>
-                    <td class="py-2 px-4 text-right text-slate-600 font-medium text-xs">${formatNumber(r.envios)}</td>
-                    <td class="py-2 px-4 text-right text-amber-600 font-medium text-xs">${formatMoney(r.costo)}</td>
-                    <td class="py-2 px-4 text-right text-emerald-600 font-bold text-xs">${formatMoney(r.cpa)}</td>
-                    <td class="py-2 px-4 text-right font-bold text-accent text-xs">${formatPercent(r.tasa)}</td>
+                    <td class="py-3 px-4 font-medium text-slate-700 text-xs">${r.producto}</td>
+                    <td class="py-3 px-4"><span class="bg-blue-50 text-blue-600 px-2 py-0.5 rounded text-[10px] font-bold border border-blue-100">${r.canal}</span></td>
+                    <td class="py-3 px-4"><span class="bg-purple-50 text-purple-600 px-2 py-0.5 rounded text-[10px] font-bold border border-purple-100">${r.segmento}</span></td>
+                    <td class="py-3 px-4 text-right text-slate-600 font-medium text-xs">${formatNumber(r.envios)}</td>
+                    <td class="py-3 px-4 text-right text-amber-600 font-bold text-xs">${formatMoney(r.costo)}</td>
+                    <td class="py-3 px-4 text-right text-emerald-600 font-bold text-xs">${formatMoney(r.cpa)}</td>
+                    <td class="py-3 px-4 text-right font-bold text-accent text-xs">${formatPercent(r.tasa)}</td>
                 </tr>
             `).join('');
         }
