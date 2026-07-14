@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Inteligencia de Campañas | Loterías BI</title>
+    <title>Inteligencia de Campañas | Loterías</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- ApexCharts -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SheetJS (Lector de Excel) -->
+    <!-- SheetJS -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
     
     <script>
@@ -18,8 +18,11 @@
             theme: {
                 extend: {
                     colors: {
-                        primary: '#1e3a8a', secondary: '#3b82f6',
-                        accent: '#10b981', danger: '#ef4444', warning: '#f59e0b'
+                        primary: '#1e3a8a',
+                        secondary: '#3b82f6',
+                        accent: '#10b981',
+                        danger: '#ef4444',
+                        warning: '#f59e0b'
                     },
                     fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
                 }
@@ -28,7 +31,7 @@
     </script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; }
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
         .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -36,16 +39,12 @@
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
         
-        /* Formularios */
-        .filter-select { @apply w-full bg-slate-50 border border-slate-200 text-slate-700 text-sm rounded-lg focus:ring-primary focus:border-primary block p-2.5; }
-        
-        /* Loader Overlay */
-        #loader { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
+        #loader { display: flex; position: fixed; inset: 0; background: rgba(255,255,255,0.9); z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #1e3a8a; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         #dashboard-content { display: none; }
-        #empty-state { display: flex; }
+        #empty-state { display: none; }
     </style>
 </head>
 <body class="text-slate-800 antialiased min-h-screen flex flex-col">
@@ -53,217 +52,235 @@
     <!-- Loader -->
     <div id="loader">
         <div class="spinner mb-4"></div>
-        <h2 class="text-xl font-bold text-primary">Procesando Motor de Datos...</h2>
-        <p class="text-slate-500 mt-2 text-sm text-center max-w-sm">Leyendo fechas, agrupando segmentos y calculando actividad. Esto tomará un par de segundos.</p>
+        <h2 class="text-xl font-bold text-primary">Conectando con Google Sheets...</h2>
+        <p class="text-slate-500 text-sm mt-2">Descargando y procesando datos en tiempo real</p>
     </div>
 
-    <!-- Header -->
-    <header class="glass sticky top-0 z-50 border-b border-slate-200 px-6 py-4 flex justify-between items-center shadow-sm">
+    <header class="glass sticky top-0 z-50 border-b border-slate-200 px-6 py-4 flex flex-wrap gap-4 justify-between items-center">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-primary text-white rounded-lg flex items-center justify-center text-xl shadow-md">
-                <i class="fa-solid fa-chart-simple"></i>
+                <i class="fa-solid fa-chart-pie"></i>
             </div>
             <div>
-                <h1 class="text-xl font-bold text-slate-900 leading-tight">Loterías BI Analytics</h1>
-                <p class="text-xs text-slate-500 font-medium">Actividad de Juego & Rendimiento de Segmentos</p>
+                <h1 class="text-xl font-bold text-slate-900 leading-tight">Inteligencia de Campañas</h1>
+                <p class="text-xs text-slate-500 font-medium">BI & Analítica de Loterías</p>
             </div>
         </div>
-        <div class="flex gap-4 items-center">
+        
+        <!-- Controles Globales -->
+        <div class="flex flex-wrap gap-3 items-center bg-slate-50 p-2 rounded-lg border border-slate-200">
+            <div class="flex flex-col">
+                <label class="text-[10px] font-bold text-slate-500 uppercase px-1">Producto</label>
+                <select id="f-producto" class="text-sm bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary outline-none"><option value="ALL">Todos</option></select>
+            </div>
+            <div class="flex flex-col">
+                <label class="text-[10px] font-bold text-slate-500 uppercase px-1">Canal</label>
+                <select id="f-canal" class="text-sm bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary outline-none"><option value="ALL">Todos</option></select>
+            </div>
+            <div class="flex flex-col">
+                <label class="text-[10px] font-bold text-slate-500 uppercase px-1">Segmento</label>
+                <select id="f-segmento" class="text-sm bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary outline-none"><option value="ALL">Todos</option></select>
+            </div>
+            <div class="flex flex-col">
+                <label class="text-[10px] font-bold text-slate-500 uppercase px-1">Desde</label>
+                <input type="date" id="f-start" class="text-sm bg-white border border-slate-300 rounded py-1 px-2 outline-none">
+            </div>
+            <div class="flex flex-col">
+                <label class="text-[10px] font-bold text-slate-500 uppercase px-1">Hasta</label>
+                <input type="date" id="f-end" class="text-sm bg-white border border-slate-300 rounded py-1 px-2 outline-none">
+            </div>
+            <div class="w-px h-8 bg-slate-300 mx-1"></div>
             <input type="file" id="fileUpload" accept=".xlsx, .xls" class="hidden">
-            <button onclick="document.getElementById('fileUpload').click()" class="bg-primary hover:bg-blue-800 text-white text-sm font-medium px-5 py-2.5 rounded-lg transition-all shadow-sm flex items-center gap-2 transform active:scale-95">
-                <i class="fa-solid fa-file-excel"></i> Cargar Reporte
+            <button onclick="document.getElementById('fileUpload').click()" class="bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold px-3 py-2 rounded-md border border-slate-300 transition-colors" title="Subir archivo manual en caso de que falle Google Sheets">
+                <i class="fa-solid fa-upload"></i> Subir Manual
             </button>
         </div>
     </header>
 
     <!-- Empty State -->
     <main id="empty-state" class="flex-1 flex items-center justify-center flex-col text-center p-6">
-        <div class="w-24 h-24 bg-blue-100 text-blue-500 rounded-2xl flex items-center justify-center text-4xl mb-6 shadow-sm rotate-3">
-            <i class="fa-solid fa-cloud-arrow-up"></i>
+        <div class="w-24 h-24 bg-red-50 text-red-300 rounded-full flex items-center justify-center text-4xl mb-6">
+            <i class="fa-solid fa-link-slash"></i>
         </div>
-        <h2 class="text-2xl font-bold text-slate-700 mb-2">Motor de Análisis Detenido</h2>
-        <p class="text-slate-500 max-w-md mx-auto mb-6">Sube tu archivo maestro de campañas. El sistema extraerá automáticamente fechas, segmentos, productos y canales para armar tu cubo de datos interactivo.</p>
-        <button onclick="document.getElementById('fileUpload').click()" class="bg-white border-2 border-slate-200 text-slate-700 hover:border-primary hover:text-primary font-bold px-8 py-3 rounded-xl transition-all shadow-sm">
-            Explorar Archivo Local
+        <h2 class="text-2xl font-bold text-slate-700 mb-2">No se pudo conectar a Google Sheets</h2>
+        <p class="text-slate-500 max-w-md mx-auto mb-6">Revisa tu conexión a internet o los permisos del enlace. Mientras tanto, puedes subir el reporte manualmente.</p>
+        <button onclick="document.getElementById('fileUpload').click()" class="bg-primary text-white font-bold px-6 py-3 rounded-lg transition-colors shadow-md hover:bg-blue-800">
+            Seleccionar Archivo Excel
         </button>
     </main>
 
-    <!-- Dashboard Content -->
     <main id="dashboard-content" class="flex-1 p-6 max-w-[1600px] mx-auto w-full flex-col gap-6">
         
-        <!-- Panel de Filtros Dinámicos -->
-        <section class="card p-4 mb-6 bg-white border-t-4 border-t-primary">
-            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-2">
-                <i class="fa-solid fa-filter"></i> Filtros de Escenario (Mix de Datos)
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Fecha Inicio</label>
-                    <input type="date" id="f-start" class="filter-select">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Fecha Fin</label>
-                    <input type="date" id="f-end" class="filter-select">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Producto</label>
-                    <select id="f-producto" class="filter-select"><option value="ALL">Todos los productos</option></select>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Canal</label>
-                    <select id="f-canal" class="filter-select"><option value="ALL">Todos los canales</option></select>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-600 mb-1">Segmento</label>
-                    <select id="f-segmento" class="filter-select"><option value="ALL">Todos los segmentos</option></select>
-                </div>
-            </div>
-        </section>
-
         <!-- KPIs -->
-        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
             <div class="card p-5 relative overflow-hidden">
-                <div class="absolute -right-4 -top-4 p-4 opacity-5 text-primary text-7xl"><i class="fa-solid fa-paper-plane"></i></div>
-                <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Volumen Impactado</h3>
+                <div class="absolute top-0 right-0 p-4 opacity-10 text-primary text-5xl"><i class="fa-solid fa-paper-plane"></i></div>
+                <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Impacto Global</h3>
                 <div class="text-3xl font-bold text-slate-800" id="kpi-envios">0</div>
-                <div class="text-xs text-slate-400 mt-1">Envíos efectivos</div>
+                <div class="mt-2 text-xs font-medium text-slate-500">Volumen filtrado de envíos</div>
             </div>
             <div class="card p-5 relative overflow-hidden">
-                <div class="absolute -right-4 -top-4 p-4 opacity-5 text-accent text-7xl"><i class="fa-solid fa-users"></i></div>
-                <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Clientes Activos</h3>
+                <div class="absolute top-0 right-0 p-4 opacity-10 text-accent text-5xl"><i class="fa-solid fa-users"></i></div>
+                <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Clientes Activos</h3>
                 <div class="text-3xl font-bold text-slate-800" id="kpi-jugadores">0</div>
-                <div class="text-xs text-accent mt-1"><i class="fa-solid fa-arrow-trend-up"></i> Jugadores reales</div>
+                <div class="mt-2 text-xs font-medium text-slate-500">Total redenciones/juego</div>
             </div>
             <div class="card p-5 relative overflow-hidden border-l-4 border-l-accent">
-                <div class="absolute -right-4 -top-4 p-4 opacity-5 text-accent text-7xl"><i class="fa-solid fa-bolt"></i></div>
-                <h3 class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Tasa de Actividad</h3>
+                <div class="absolute top-0 right-0 p-4 opacity-10 text-accent text-5xl"><i class="fa-solid fa-bolt"></i></div>
+                <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-1">Tasa de Actividad</h3>
                 <div class="text-3xl font-bold text-accent" id="kpi-tasa">0.00%</div>
-                <div class="text-xs text-slate-400 mt-1">Conversión de este Mix</div>
+                <div class="mt-2 text-xs font-medium text-slate-500">Conversión ponderada</div>
             </div>
-            <div class="card p-5 bg-gradient-to-br from-slate-800 to-slate-900 text-white relative overflow-hidden">
-                <div class="absolute -right-4 -top-4 p-4 opacity-10 text-white text-7xl"><i class="fa-solid fa-crown"></i></div>
-                <h3 class="text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">Segmento Top</h3>
-                <div class="text-xl font-bold mb-1 truncate text-warning" id="kpi-mix-name">-</div>
-                <div class="flex items-center gap-2 mt-1">
-                    <span class="text-sm font-semibold bg-white/10 px-2 py-0.5 rounded text-white" id="kpi-mix-tasa">0%</span>
+            <div class="card p-5 bg-gradient-to-br from-primary to-blue-700 text-white shadow-lg">
+                <h3 class="text-sm font-medium text-blue-200 uppercase tracking-wider mb-1">Producto Estrella</h3>
+                <div class="text-2xl font-bold mb-1 truncate" id="kpi-mix-name">-</div>
+                <div class="flex items-center gap-2 mt-1 bg-white/20 rounded px-2 py-1 w-fit">
+                    <i class="fa-solid fa-star text-yellow-300 text-xs"></i>
+                    <span class="text-sm font-semibold" id="kpi-mix-tasa">0%</span>
                 </div>
             </div>
         </section>
 
-        <!-- Dynamic Chart & Insights Row -->
-        <section class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-            
-            <!-- Gráfico Dinámico Centralizado -->
-            <div class="card p-6 col-span-1 lg:col-span-2 flex flex-col">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <!-- Insights de Diagnóstico -->
+        <section class="grid grid-cols-1 lg:grid-cols-4 gap-4 mb-6">
+            <div class="card p-4 border-t-4 border-t-blue-500 bg-blue-50/30">
+                <h4 class="text-xs font-bold text-blue-600 uppercase mb-1"><i class="fa-solid fa-tower-cell mr-1"></i> Mejor Canal</h4>
+                <p class="text-sm text-slate-700 leading-tight" id="insight-canal">Cargando...</p>
+            </div>
+            <div class="card p-4 border-t-4 border-t-emerald-500 bg-emerald-50/30">
+                <h4 class="text-xs font-bold text-emerald-600 uppercase mb-1"><i class="fa-solid fa-tags mr-1"></i> Mejor Producto</h4>
+                <p class="text-sm text-slate-700 leading-tight" id="insight-producto">Cargando...</p>
+            </div>
+            <div class="card p-4 border-t-4 border-t-purple-500 bg-purple-50/30">
+                <h4 class="text-xs font-bold text-purple-600 uppercase mb-1"><i class="fa-solid fa-users-viewfinder mr-1"></i> Mejor Segmento</h4>
+                <p class="text-sm text-slate-700 leading-tight" id="insight-segmento">Cargando...</p>
+            </div>
+            <div class="card p-4 border-t-4 border-t-warning bg-amber-50/30">
+                <h4 class="text-xs font-bold text-amber-600 uppercase mb-1"><i class="fa-solid fa-comment-dots mr-1"></i> Gatillo de Copy</h4>
+                <p class="text-sm text-slate-700 leading-tight" id="insight-keyword">Cargando...</p>
+            </div>
+        </section>
+
+        <!-- Gráficos Interactivos -->
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Gráfico Dinámico (Agrupador) -->
+            <div class="card p-6 flex flex-col">
+                <div class="flex justify-between items-center mb-4">
                     <div>
-                        <h2 class="text-lg font-bold text-slate-800">Rendimiento por Categoría</h2>
-                        <p class="text-xs text-slate-500">Tasa de actividad promedio (%)</p>
+                        <h2 class="text-lg font-bold text-slate-800">Rendimiento Comparativo</h2>
+                        <p class="text-xs text-slate-500">Ordenado de mayor a menor efectividad</p>
                     </div>
-                    <div class="flex items-center gap-2 bg-slate-100 p-1.5 rounded-lg border border-slate-200">
-                        <span class="text-xs font-medium text-slate-600 pl-2">Ver por:</span>
-                        <select id="chart-dimension" class="text-sm bg-white border-slate-200 rounded text-slate-700 py-1 px-3 shadow-sm font-medium focus:ring-primary focus:border-primary">
+                    <div class="flex items-center gap-2 bg-slate-100 p-1 rounded border border-slate-200">
+                        <span class="text-xs font-bold text-slate-500 px-2">Ver por:</span>
+                        <select id="chart-dimension" class="text-sm bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary font-medium outline-none">
                             <option value="canal">Canal</option>
                             <option value="producto">Producto</option>
-                            <option value="segmento" selected>Segmento</option>
-                            <option value="campana">Campaña (Top 15)</option>
+                            <option value="segmento">Segmento</option>
+                            <option value="campaña">Campaña (Top 15)</option>
                         </select>
                     </div>
                 </div>
-                <div id="chart-dynamic" class="w-full flex-1 min-h-[300px]"></div>
+                <div id="chart-dynamic" class="w-full h-72"></div>
             </div>
-
-            <!-- Insights Generados -->
-            <div class="card p-6 border-t-4 border-t-warning flex flex-col">
-                <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2 mb-4">
-                    <i class="fa-solid fa-brain text-warning"></i> Análisis Inteligente
-                </h2>
-                <div class="space-y-4 overflow-auto flex-1 pr-2">
-                    <div class="flex gap-3 items-start">
-                        <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-box-open"></i></div>
-                        <div>
-                            <h4 class="font-semibold text-slate-800 text-sm">Producto Estrella</h4>
-                            <p class="text-xs text-slate-600 mt-0.5 leading-relaxed" id="insight-producto">Cargando...</p>
-                        </div>
+            
+            <!-- Gráfico Evolutivo -->
+            <div class="card p-6 flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <div>
+                        <h2 class="text-lg font-bold text-slate-800">Evolución en el Tiempo</h2>
+                        <p class="text-xs text-slate-500">Tendencia de actividad del mix filtrado</p>
                     </div>
-                    <div class="flex gap-3 items-start">
-                        <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-tower-broadcast"></i></div>
-                        <div>
-                            <h4 class="font-semibold text-slate-800 text-sm">Canal Óptimo</h4>
-                            <p class="text-xs text-slate-600 mt-0.5 leading-relaxed" id="insight-canal">Cargando...</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-3 items-start">
-                        <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-users-viewfinder"></i></div>
-                        <div>
-                            <h4 class="font-semibold text-slate-800 text-sm">Concentración de Segmento</h4>
-                            <p class="text-xs text-slate-600 mt-0.5 leading-relaxed" id="insight-concentracion">Cargando...</p>
-                        </div>
-                    </div>
-                    <div class="flex gap-3 items-start">
-                        <div class="w-8 h-8 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center shrink-0"><i class="fa-solid fa-comment-dots"></i></div>
-                        <div>
-                            <h4 class="font-semibold text-slate-800 text-sm">Gatillo Semántico</h4>
-                            <p class="text-xs text-slate-600 mt-0.5 leading-relaxed" id="insight-keyword">Cargando...</p>
-                        </div>
+                    <div class="flex items-center gap-2 bg-slate-100 p-1 rounded border border-slate-200">
+                        <span class="text-xs font-bold text-slate-500 px-2">Agrupar:</span>
+                        <select id="chart-aggregation" class="text-sm bg-white border border-slate-300 rounded py-1 px-2 focus:ring-primary font-medium outline-none">
+                            <option value="day">Diario</option>
+                            <option value="week">Semanal</option>
+                            <option value="month">Mensual</option>
+                            <option value="quarter">Trimestral</option>
+                            <option value="semester">Semestral</option>
+                            <option value="year">Anual</option>
+                        </select>
                     </div>
                 </div>
+                <div id="chart-evolution" class="w-full h-72"></div>
             </div>
         </section>
 
-        <!-- Tablas de Resultados (Mix de Filtros) -->
-        <section class="grid grid-cols-1 gap-6">
-            
-            <div class="card p-0 overflow-hidden flex flex-col h-[500px] border-t-4 border-t-primary">
-                <div class="bg-slate-50 p-4 border-b border-slate-200 flex justify-between items-center">
-                    <div>
-                        <h2 class="text-md font-bold text-slate-800 flex items-center gap-2">
-                            <i class="fa-solid fa-table-list text-primary"></i> Resultados del Mix Filtrado
-                        </h2>
-                        <p class="text-xs text-slate-500 mt-1">Campañas ordenadas de mayor a menor Actividad según filtros actuales.</p>
-                    </div>
-                    <div class="text-xs font-bold text-slate-600 bg-white px-3 py-1.5 rounded-md border border-slate-200 shadow-sm">
-                        Total Registros: <span id="table-count" class="text-primary">0</span>
-                    </div>
-                </div>
-                <div class="p-0 overflow-auto flex-1">
-                    <table class="w-full text-left border-collapse text-sm whitespace-nowrap">
-                        <thead class="bg-white sticky top-0 shadow-sm z-10 text-xs uppercase text-slate-500 font-semibold">
-                            <tr>
-                                <th class="py-3 px-4 border-b">Fecha</th>
-                                <th class="py-3 px-4 border-b">Producto</th>
-                                <th class="py-3 px-4 border-b">Canal</th>
-                                <th class="py-3 px-4 border-b">Segmento</th>
-                                <th class="py-3 px-4 border-b max-w-xs">Campaña</th>
-                                <th class="py-3 px-4 border-b text-right">Impactos</th>
-                                <th class="py-3 px-4 border-b text-right">Jugadores</th>
-                                <th class="py-3 px-4 border-b text-right text-primary font-bold">Actividad</th>
-                            </tr>
-                        </thead>
-                        <tbody id="mix-table-body" class="divide-y divide-slate-100 bg-white">
-                            <!-- JS Injection -->
-                        </tbody>
-                    </table>
-                </div>
+        <!-- Tabla Completa de Resultados -->
+        <section class="card p-0 overflow-hidden flex flex-col h-[500px]">
+            <div class="bg-slate-50 p-4 border-b border-slate-200 flex justify-between items-center">
+                <h2 class="text-md font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-table-list text-primary"></i> Auditoría de Resultados (Según Filtros Aplicados)
+                </h2>
+                <span class="text-xs font-medium text-slate-500 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm">Ordenado por Tasa de Actividad</span>
+            </div>
+            <div class="p-0 overflow-auto flex-1">
+                <table class="w-full text-left border-collapse text-sm whitespace-nowrap">
+                    <thead class="bg-white sticky top-0 shadow-sm z-10">
+                        <tr>
+                            <th class="py-3 px-4 font-bold text-slate-600 border-b">Fecha</th>
+                            <th class="py-3 px-4 font-bold text-slate-600 border-b">Campaña / Mensaje</th>
+                            <th class="py-3 px-4 font-bold text-slate-600 border-b">Producto</th>
+                            <th class="py-3 px-4 font-bold text-slate-600 border-b">Canal</th>
+                            <th class="py-3 px-4 font-bold text-slate-600 border-b">Segmento</th>
+                            <th class="py-3 px-4 font-bold text-slate-600 border-b text-right">Impactos</th>
+                            <th class="py-3 px-4 font-bold text-slate-600 border-b text-right text-accent">Tasa Act.</th>
+                        </tr>
+                    </thead>
+                    <tbody id="mix-table-body" class="divide-y divide-slate-100 bg-slate-50/30">
+                        <!-- Generado por JS -->
+                    </tbody>
+                </table>
             </div>
         </section>
     </main>
 
     <script>
-        // Variables Globales
+        // Variables Globales de Estado
         window.allData = [];
         window.filteredData = [];
         let dynamicChart = null;
+        let evolutionChart = null;
 
         const formatNumber = (num) => new Intl.NumberFormat('es-PE').format(num);
         const formatPercent = (num) => (num * 100).toFixed(2) + '%';
         const formatDate = (dateString) => {
             if(!dateString) return '-';
             const d = new Date(dateString);
-            return d.toLocaleDateString('es-PE', { year: 'numeric', month: '2-digit', day: '2-digit' });
+            if (isNaN(d)) return dateString;
+            return d.toISOString().split('T')[0]; // YYYY-MM-DD format
         };
 
-        // 1. Escuchar la carga del Excel
+        // --- CONEXIÓN A GOOGLE SHEETS ---
+        // Usamos la URL pública con el sufijo /export?format=xlsx
+        const GSHEETS_URL = "https://docs.google.com/spreadsheets/d/1EaZg4Vzik-4V67dB5S0srP8vMBf36ChYTR3eFwhgNoA/export?format=xlsx";
+
+        document.addEventListener('DOMContentLoaded', fetchFromGoogleSheets);
+
+        async function fetchFromGoogleSheets() {
+            document.getElementById('empty-state').style.display = 'none';
+            document.getElementById('dashboard-content').style.display = 'none';
+            document.getElementById('loader').style.display = 'flex';
+            
+            try {
+                const response = await fetch(GSHEETS_URL);
+                if (!response.ok) throw new Error("Error en red o enlace inválido");
+                const arrayBuffer = await response.arrayBuffer();
+                
+                const workbook = XLSX.read(arrayBuffer, {type: 'array', cellDates: true});
+                let sheetName = workbook.SheetNames.includes('Reporte_Nuevo') ? 'Reporte_Nuevo' : workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const jsonData = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
+                
+                processAndStoreData(jsonData);
+            } catch (error) {
+                console.error("Error descargando desde Google Sheets:", error);
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('empty-state').style.display = 'flex';
+            }
+        }
+
+        // --- CARGA MANUAL DE EXCEL (FALLBACK) ---
         document.getElementById('fileUpload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (!file) return;
@@ -273,19 +290,15 @@
             document.getElementById('loader').style.display = 'flex';
 
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function(evt) {
                 try {
-                    const data = new Uint8Array(e.target.result);
+                    const data = new Uint8Array(evt.target.result);
                     const workbook = XLSX.read(data, {type: 'array', cellDates: true});
-                    
                     let sheetName = workbook.SheetNames.includes('Reporte_Nuevo') ? 'Reporte_Nuevo' : workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
-                    
+                    const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {defval: ""});
                     processAndStoreData(jsonData);
                 } catch (error) {
                     console.error(error);
-                    alert("Error procesando el Excel. Asegúrate de que el formato sea correcto.");
                     document.getElementById('loader').style.display = 'none';
                     document.getElementById('empty-state').style.display = 'flex';
                 }
@@ -293,93 +306,77 @@
             reader.readAsArrayBuffer(file);
         });
 
-        // 2. Procesar y almacenar datos puros
+        // --- PROCESAMIENTO Y LIMPIEZA DE DATOS ---
         function processAndStoreData(json) {
             window.allData = [];
-            let minDate = new Date('2099-01-01');
-            let maxDate = new Date('1970-01-01');
+            let pSet = new Set(), cSet = new Set(), sSet = new Set();
+            let minD = '2099-12-31', maxD = '2000-01-01';
 
             json.forEach(row => {
                 let envios = parseFloat(row['Total de envíos']) || 0;
                 let jugadores = parseFloat(row['Clientes que jugaron']) || 0;
+                let producto = (row['Producto'] || 'Sin clasificar').toString().trim();
+                let canal = (row['TIPO'] || row['Tipo'] || 'Otro').toString().trim();
+                let segmento = (row['Segmento'] || 'Global').toString().trim();
+                let mensaje = (row['Campaña.1'] || row['Mensaje'] || row['Campaña'] || '').toString().trim();
+                let campañaName = (row['Campaña'] || 'Desconocida').toString().trim();
                 
+                // Parse Date
+                let fechaRaw = row['Fecha de Envío'] || row['Fecha'];
+                let fecha = '';
+                if (fechaRaw instanceof Date) {
+                    fecha = fechaRaw.toISOString().split('T')[0];
+                } else if (fechaRaw) {
+                    let d = new Date(fechaRaw);
+                    if (!isNaN(d)) fecha = d.toISOString().split('T')[0];
+                }
+
                 if (envios > 0) {
-                    // Mapeo Robusto
-                    let producto = (row['Producto'] || 'Sin clasificar').trim();
-                    let canal = (row['TIPO'] || row['Tipo'] || 'Otro').trim();
-                    let segmento = (row['Segmento'] || 'Masivo / No Especificado').trim();
-                    let campana = (row['Campaña'] || 'Sin nombre').trim();
-                    let mensaje = String(row['Campaña.1'] || row['Mensaje'] || row['Campaña'] || '');
-                    
-                    // Manejo de Fechas Excel
-                    let rawDate = row['Fecha de Envío'] || row['Fecha'];
-                    let dateObj = null;
-                    
-                    if (rawDate instanceof Date) {
-                        dateObj = rawDate;
-                    } else if (typeof rawDate === 'number') {
-                        dateObj = new Date((rawDate - (25567 + 2)) * 86400 * 1000); // Excel serial
-                    } else if (typeof rawDate === 'string') {
-                        dateObj = new Date(rawDate);
-                    }
-
-                    let dateString = null;
-                    if (dateObj && !isNaN(dateObj.getTime())) {
-                        dateString = dateObj.toISOString().split('T')[0];
-                        if(dateObj < minDate) minDate = dateObj;
-                        if(dateObj > maxDate) maxDate = dateObj;
-                    }
-
                     window.allData.push({
-                        date: dateString,
-                        producto: producto,
-                        canal: canal,
-                        segmento: segmento,
-                        campana: campana,
-                        mensaje: mensaje,
-                        envios: envios,
-                        jugadores: jugadores,
-                        tasa: jugadores / envios
+                        producto, canal, segmento, mensaje, fecha, campaña: campañaName,
+                        envios, jugadores,
+                        tasa: envios > 0 ? (jugadores / envios) : 0
                     });
+
+                    pSet.add(producto);
+                    cSet.add(canal);
+                    sSet.add(segmento);
+                    if (fecha) {
+                        if(fecha < minD) minD = fecha;
+                        if(fecha > maxD) maxD = fecha;
+                    }
                 }
             });
 
             if(window.allData.length === 0){
-                alert("No se detectaron filas válidas con 'Total de envíos' > 0.");
+                console.error("No hay datos válidos.");
                 document.getElementById('loader').style.display = 'none';
+                document.getElementById('empty-state').style.display = 'flex';
                 return;
             }
 
-            populateFilterDropdowns(minDate, maxDate);
-            applyFilters(); // Inicializa el dashboard
-
-            setTimeout(() => {
-                document.getElementById('loader').style.display = 'none';
-                document.getElementById('dashboard-content').style.display = 'flex';
-            }, 500);
-        }
-
-        // 3. Poblar Filtros UI
-        function populateFilterDropdowns(minDate, maxDate) {
-            const getUnique = (key) => [...new Set(window.allData.map(item => item[key]))].sort();
-            
-            const fillSelect = (id, arr, defaultText) => {
+            // Poblar Selectores
+            const populate = (id, set) => {
                 const el = document.getElementById(id);
-                el.innerHTML = `<option value="ALL">${defaultText}</option>`;
-                arr.forEach(val => { if(val) el.innerHTML += `<option value="${val}">${val}</option>`; });
+                el.innerHTML = '<option value="ALL">Todos</option>';
+                [...set].sort().forEach(item => el.innerHTML += `<option value="${item}">${item}</option>`);
             };
-
-            fillSelect('f-producto', getUnique('producto'), 'Todos los productos');
-            fillSelect('f-canal', getUnique('canal'), 'Todos los canales');
-            fillSelect('f-segmento', getUnique('segmento'), 'Todos los segmentos');
-
-            if (minDate <= maxDate) {
-                document.getElementById('f-start').value = minDate.toISOString().split('T')[0];
-                document.getElementById('f-end').value = maxDate.toISOString().split('T')[0];
+            populate('f-producto', pSet);
+            populate('f-canal', cSet);
+            populate('f-segmento', sSet);
+            
+            if(minD !== '2099-12-31' && maxD !== '2000-01-01') {
+                document.getElementById('f-start').value = minD;
+                document.getElementById('f-end').value = maxD;
             }
+
+            // Ocultar loader y arrancar
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('dashboard-content').style.display = 'flex';
+            
+            applyFilters();
         }
 
-        // 4. Lógica de Filtrado cruzado
         function applyFilters() {
             const fProd = document.getElementById('f-producto').value;
             const fCanal = document.getElementById('f-canal').value;
@@ -392,10 +389,9 @@
                 if (fProd !== 'ALL' && d.producto !== fProd) match = false;
                 if (fCanal !== 'ALL' && d.canal !== fCanal) match = false;
                 if (fSeg !== 'ALL' && d.segmento !== fSeg) match = false;
-                
-                if (d.date) {
-                    if (fStart && d.date < fStart) match = false;
-                    if (fEnd && d.date > fEnd) match = false;
+                if (d.fecha) {
+                    if (fStart && d.fecha < fStart) match = false;
+                    if (fEnd && d.fecha > fEnd) match = false;
                 }
                 return match;
             });
@@ -403,52 +399,38 @@
             updateDashboardUI();
         }
 
-        // Listeners para todos los filtros
-        ['f-producto', 'f-canal', 'f-segmento', 'f-start', 'f-end', 'chart-dimension'].forEach(id => {
-            document.getElementById(id).addEventListener('change', () => {
-                if(id === 'chart-dimension') { renderDynamicChart(); } // Solo redibuja el gráfico
-                else { applyFilters(); } // Recalcula todo
-            });
+        ['f-producto', 'f-canal', 'f-segmento', 'f-start', 'f-end'].forEach(id => {
+            document.getElementById(id).addEventListener('change', applyFilters);
         });
+        document.getElementById('chart-dimension').addEventListener('change', () => renderDynamicChart());
+        document.getElementById('chart-aggregation').addEventListener('change', () => renderEvolutionChart());
 
-
-        // 5. Actualizar UI Principal
         function updateDashboardUI() {
-            const data = window.filteredData;
             let tEnvios = 0, tJugadores = 0;
-            const segMap = {};
-            const prodMap = {};
-            const canalMap = {};
-            const kwMap = {
-                'Urgencia/Tiempo': { words: ['hoy', 'ahora', 'ya', 'solo por'], e: 0, j: 0 },
-                'Regalo/Gratis': { words: ['gratis', 'regalo', 'lleva'], e: 0, j: 0 },
-                'Incentivo': { words: ['saldo', 'bono', 's/'], e: 0, j: 0 },
-                'Pozo': { words: ['pozo', 'millones'], e: 0, j: 0 }
+            const dictProd = {}, dictCanal = {}, dictSeg = {};
+            const kwAnalysis = {
+                'Urgencia/Tiempo': { words: ['hoy', 'ahora', 'ya', 'solo por'], e:0, j:0 },
+                'Regalo/Gratis': { words: ['gratis', 'regalo', 'lleva'], e:0, j:0 },
+                'Incentivo Econ.': { words: ['saldo', 'bono', 's/'], e:0, j:0 },
+                'Pozo/Premios': { words: ['pozo', 'millones', 'acumulado'], e:0, j:0 },
             };
 
-            data.forEach(r => {
-                tEnvios += r.envios;
-                tJugadores += r.jugadores;
+            window.filteredData.forEach(r => {
+                tEnvios += r.envios; tJugadores += r.jugadores;
+                
+                if(!dictProd[r.producto]) dictProd[r.producto] = {e:0, j:0};
+                dictProd[r.producto].e += r.envios; dictProd[r.producto].j += r.jugadores;
+                
+                if(!dictCanal[r.canal]) dictCanal[r.canal] = {e:0, j:0};
+                dictCanal[r.canal].e += r.envios; dictCanal[r.canal].j += r.jugadores;
 
-                // Agrupador para KPI Segmento Top
-                if(!segMap[r.segmento]) segMap[r.segmento] = {e:0, j:0};
-                segMap[r.segmento].e += r.envios;
-                segMap[r.segmento].j += r.jugadores;
+                if(!dictSeg[r.segmento]) dictSeg[r.segmento] = {e:0, j:0};
+                dictSeg[r.segmento].e += r.envios; dictSeg[r.segmento].j += r.jugadores;
 
-                if(!prodMap[r.producto]) prodMap[r.producto] = {e:0, j:0};
-                prodMap[r.producto].e += r.envios;
-                prodMap[r.producto].j += r.jugadores;
-
-                if(!canalMap[r.canal]) canalMap[r.canal] = {e:0, j:0};
-                canalMap[r.canal].e += r.envios;
-                canalMap[r.canal].j += r.jugadores;
-
-                // NLP
                 let msg = r.mensaje.toLowerCase();
-                for (let k in kwMap) {
-                    if (kwMap[k].words.some(w => msg.includes(w))) {
-                        kwMap[k].e += r.envios;
-                        kwMap[k].j += r.jugadores;
+                for(let cat in kwAnalysis) {
+                    if(kwAnalysis[cat].words.some(w => msg.includes(w))) {
+                        kwAnalysis[cat].e += r.envios; kwAnalysis[cat].j += r.jugadores;
                     }
                 }
             });
@@ -458,141 +440,167 @@
             document.getElementById('kpi-jugadores').innerText = formatNumber(tJugadores);
             document.getElementById('kpi-tasa').innerText = formatPercent(tEnvios > 0 ? (tJugadores/tEnvios) : 0);
 
-            // Helpers para encontrar el mejor de cada categoría
-            const getBest = (map, minVol) => {
-                let best = { name: '-', rate: 0 };
-                for (let k in map) {
-                    let r = map[k].e > 0 ? (map[k].j / map[k].e) : 0;
-                    if (r > best.rate && map[k].e >= minVol) best = { name: k, rate: r };
+            // Best Mix (Producto Estrella)
+            let bestProd = {n: '-', r:0};
+            for(let p in dictProd) {
+                let r = dictProd[p].e > 500 ? (dictProd[p].j/dictProd[p].e) : 0;
+                if(r > bestProd.r) bestProd = {n: p, r: r};
+            }
+            document.getElementById('kpi-mix-name').innerText = bestProd.n;
+            document.getElementById('kpi-mix-tasa').innerText = formatPercent(bestProd.r);
+
+            // Insights
+            const getBest = (dict, minEnvios = 500) => {
+                let best = {n: 'N/A', r: 0};
+                for(let k in dict) {
+                    let r = dict[k].e > minEnvios ? (dict[k].j/dict[k].e) : 0;
+                    if(r > best.r) best = {n: k, r: r};
                 }
                 return best;
-            };
-
-            let bestSeg = getBest(segMap, 100);
-            if(bestSeg.name === '-') bestSeg = getBest(segMap, 0); // Fallback
-            
-            let bestProd = getBest(prodMap, 100);
-            if(bestProd.name === '-') bestProd = getBest(prodMap, 0);
-            
-            let bestCanal = getBest(canalMap, 100);
-            if(bestCanal.name === '-') bestCanal = getBest(canalMap, 0);
-
-            document.getElementById('kpi-mix-name').innerText = bestSeg.name;
-            document.getElementById('kpi-mix-name').title = bestSeg.name;
-            document.getElementById('kpi-mix-tasa').innerText = formatPercent(bestSeg.rate);
-
-            // Update Insights
-            let bestKw = { name: 'Genérico', rate: 0 };
-            for(let k in kwMap) {
-                let r = kwMap[k].e > 0 ? (kwMap[k].j/kwMap[k].e) : 0;
-                if(r > bestKw.rate) bestKw = {name: k, rate: r};
             }
             
-            document.getElementById('insight-producto').innerHTML = tEnvios > 0 ? 
-                `<b>${bestProd.name}</b> lidera la atracción con <b>${formatPercent(bestProd.rate)}</b> de actividad.` : 'Sin datos.';
-            
-            document.getElementById('insight-canal').innerHTML = tEnvios > 0 ? 
-                `El canal <b>${bestCanal.name}</b> es la vía más efectiva (<b>${formatPercent(bestCanal.rate)}</b>).` : 'Sin datos.';
+            let topC = getBest(dictCanal);
+            let topS = getBest(dictSeg);
+            let topK = getBest(kwAnalysis, 100);
 
-            document.getElementById('insight-concentracion').innerHTML = tEnvios > 0 ? 
-                `El segmento <b>${bestSeg.name}</b> concentra el engagement (<b>${formatPercent(bestSeg.rate)}</b>).` : 'Sin datos.';
+            document.getElementById('insight-canal').innerHTML = topC.r > 0 ? `<b>${topC.n}</b> logra la mayor retención (${formatPercent(topC.r)}). Priorizar para envíos core.` : 'Datos insuficientes.';
+            document.getElementById('insight-producto').innerHTML = bestProd.r > 0 ? `<b>${bestProd.n}</b> es el motor actual. Apoyar con triggers.` : 'Datos insuficientes.';
+            document.getElementById('insight-segmento').innerHTML = topS.r > 0 ? `<b>${topS.n}</b> es el más responsivo (${formatPercent(topS.r)}).` : 'Datos insuficientes.';
+            document.getElementById('insight-keyword').innerHTML = topK.r > 0 ? `Conceptos de <b>${topK.n}</b> logran ${formatPercent(topK.r)} de actividad.` : 'Sin patrones de copy fuertes.';
 
-            document.getElementById('insight-keyword').innerHTML = tEnvios > 0 ? 
-                `El concepto de <b>${bestKw.name}</b> capta mayor atención (<b>${formatPercent(bestKw.rate)}</b>).` : 'Sin datos.';
-
-            // Render Chart
             renderDynamicChart();
-            
-            // Render Table
-            renderMixTable(data);
+            renderEvolutionChart();
+            renderMixTable();
         }
 
-        // 6. Gráfico Dinámico (Agrupa según lo seleccionado)
         function renderDynamicChart() {
-            const dimension = document.getElementById('chart-dimension').value;
+            const dim = document.getElementById('chart-dimension').value;
             const groupMap = {};
             
             window.filteredData.forEach(r => {
-                let key = r[dimension] || 'Desconocido';
+                let key = r[dim];
+                if(dim === 'campaña' && !key) key = 'Sin Nombre';
                 if(!groupMap[key]) groupMap[key] = {e:0, j:0};
                 groupMap[key].e += r.envios;
                 groupMap[key].j += r.jugadores;
             });
 
-            // Convertir a Array, calcular tasa, filtrar min envios y ordenar
-            let chartDataArr = Object.keys(groupMap).map(k => ({
-                cat: k,
-                rate: groupMap[k].e > 0 ? (groupMap[k].j / groupMap[k].e * 100) : 0,
-                vol: groupMap[k].e
-            })).filter(d => d.vol > 10) // Ignorar ruido estadístico pequeño
-              .sort((a,b) => b.rate - a.rate);
-            
-            // Si hay muchos (ej. Campañas), cortar al Top 15 para no romper el gráfico
-            if(chartDataArr.length > 15) chartDataArr = chartDataArr.slice(0, 15);
-            // NOTA: Se ha removido la inversión del array (reverse) para que el mejor quede arriba
+            // Calcular tasa y ordenar de mayor a menor
+            let sortedArr = Object.keys(groupMap).map(k => {
+                return { name: k, rate: groupMap[k].e > 0 ? (groupMap[k].j / groupMap[k].e * 100) : 0, vol: groupMap[k].e };
+            }).filter(item => item.vol > 0).sort((a, b) => b.rate - a.rate);
 
-            const categories = chartDataArr.map(d => {
-                // Truncar nombres largos para el eje Y
-                return d.cat.length > 25 ? d.cat.substring(0, 25) + '...' : d.cat;
-            });
-            const seriesData = chartDataArr.map(d => d.rate.toFixed(2));
+            if (dim === 'campaña') sortedArr = sortedArr.slice(0, 15); // Top 15 para campañas
 
-            // Colores dinámicos
-            const colorMap = { canal: '#3b82f6', producto: '#f59e0b', segmento: '#8b5cf6', campana: '#10b981' };
-            const chartColor = colorMap[dimension];
+            const categories = sortedArr.map(i => i.name.length > 25 ? i.name.substring(0,25)+'...' : i.name);
+            const seriesData = sortedArr.map(i => i.rate.toFixed(2));
 
             if(dynamicChart) dynamicChart.destroy();
-            
-            if(categories.length === 0) {
-                document.getElementById('chart-dynamic').innerHTML = '<div class="flex items-center justify-center h-full text-slate-400">No hay datos suficientes</div>';
-                return;
-            }
 
             const options = {
-                series: [{ name: 'Actividad', data: seriesData }],
+                series: [{ name: 'Efectividad (%)', data: seriesData }],
                 chart: { type: 'bar', height: '100%', toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
-                plotOptions: { bar: { borderRadius: 4, horizontal: true, dataLabels: { position: 'top' } } },
-                colors: [chartColor],
-                dataLabels: {
-                    enabled: true, offsetX: 25,
-                    style: { fontSize: '11px', colors: ['#475569'] },
-                    formatter: function(val) { return val + "%" }
-                },
-                xaxis: { categories: categories, labels: { formatter: function(val) { return val + "%" } } },
-                tooltip: {
-                    y: { formatter: function(val) { return val + "%" } }
-                },
-                grid: { strokeDashArray: 4, borderColor: '#e2e8f0', padding: {left: 10, right: 20} }
+                plotOptions: { bar: { borderRadius: 4, horizontal: true, dataLabels: { position: 'top' }, distributed: true } },
+                colors: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#f43f5e'], // Paleta dinámica
+                dataLabels: { enabled: true, offsetX: 30, style: { fontSize: '11px', colors: ['#475569'] }, formatter: (val) => val + "%" },
+                xaxis: { categories: categories, labels: { show: false } },
+                legend: { show: false },
+                grid: { strokeDashArray: 4, borderColor: '#e2e8f0', xaxis: {lines: {show: true}}, yaxis: {lines: {show: false}} }
             };
-            
-            document.getElementById('chart-dynamic').innerHTML = ''; // Limpiar fallback
+
             dynamicChart = new ApexCharts(document.querySelector("#chart-dynamic"), options);
             dynamicChart.render();
         }
 
-        // 7. Tabla del Mix (Ordenada por Actividad)
-        function renderMixTable(data) {
-            // Clonar y ordenar de mayor a menor Actividad (tasa)
-            const sortedData = [...data].sort((a,b) => b.tasa - a.tasa);
+        function getAggregatedDate(dateStr, interval) {
+            if (!dateStr) return 'Desc';
+            const dObj = new Date(dateStr);
+            if(isNaN(dObj)) return dateStr;
+            const y = dObj.getUTCFullYear();
+            const m = dObj.getUTCMonth() + 1;
+            const d = dObj.getUTCDate();
             
-            document.getElementById('table-count').innerText = sortedData.length;
+            const ms = m.toString().padStart(2, '0');
+            const ds = d.toString().padStart(2, '0');
 
-            const rowsHtml = sortedData.map(r => `
-                <tr class="hover:bg-blue-50/50 transition-colors border-b border-slate-100 last:border-0">
-                    <td class="py-2.5 px-4 text-slate-500">${formatDate(r.date)}</td>
-                    <td class="py-2.5 px-4 font-medium text-slate-800">${r.producto}</td>
-                    <td class="py-2.5 px-4"><span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[11px] border border-slate-200">${r.canal}</span></td>
-                    <td class="py-2.5 px-4 text-slate-600 text-xs max-w-[200px] truncate" title="${r.segmento}">${r.segmento}</td>
-                    <td class="py-2.5 px-4 text-slate-500 text-xs max-w-[250px] truncate" title="${r.campana}">${r.campana}</td>
-                    <td class="py-2.5 px-4 text-right text-slate-600">${formatNumber(r.envios)}</td>
-                    <td class="py-2.5 px-4 text-right text-slate-600">${formatNumber(r.jugadores)}</td>
-                    <td class="py-2.5 px-4 text-right font-bold ${r.tasa > 0.05 ? 'text-accent' : (r.tasa < 0.01 ? 'text-danger' : 'text-slate-800')}">${formatPercent(r.tasa)}</td>
+            switch (interval) {
+                case 'day': return `${y}-${ms}-${ds}`;
+                case 'week':
+                    const start = new Date(Date.UTC(y, 0, 1));
+                    const diff = (dObj - start) / 86400000;
+                    const w = Math.ceil((diff + start.getUTCDay() + 1) / 7);
+                    return `${y}-W${w.toString().padStart(2,'0')}`;
+                case 'month': return `${y}-${ms}`;
+                case 'quarter': return `${y}-Q${Math.ceil(m / 3)}`;
+                case 'semester': return `${y}-S${m <= 6 ? 1 : 2}`;
+                case 'year': return `${y}`;
+                default: return dateStr;
+            }
+        }
+
+        function renderEvolutionChart() {
+            const interval = document.getElementById('chart-aggregation').value;
+            const groupMap = {};
+
+            window.filteredData.forEach(r => {
+                if(!r.fecha) return;
+                let aggDate = getAggregatedDate(r.fecha, interval);
+                if(!groupMap[aggDate]) groupMap[aggDate] = {e:0, j:0};
+                groupMap[aggDate].e += r.envios;
+                groupMap[aggDate].j += r.jugadores;
+            });
+
+            // Ordenar cronológicamente
+            let sortedKeys = Object.keys(groupMap).sort();
+            
+            const categories = sortedKeys;
+            const seriesData = sortedKeys.map(k => {
+                return groupMap[k].e > 0 ? (groupMap[k].j / groupMap[k].e * 100).toFixed(2) : 0;
+            });
+
+            if(evolutionChart) evolutionChart.destroy();
+
+            const options = {
+                series: [{ name: 'Efectividad Promedio', data: seriesData }],
+                chart: { type: 'area', height: '100%', toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
+                colors: ['#10b981'], // Verde para evolución
+                fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.4, opacityTo: 0.05, stops: [0, 100] } },
+                dataLabels: { enabled: false },
+                stroke: { curve: 'smooth', width: 3 },
+                xaxis: { categories: categories, tooltip: { enabled: false } },
+                yaxis: { labels: { formatter: function(val) { return val + "%" } } },
+                tooltip: { y: { formatter: function(val) { return val + "%" } } },
+                grid: { strokeDashArray: 4, borderColor: '#e2e8f0', padding: {left: 10, right: 20} },
+                markers: { size: 4, colors: ['#fff'], strokeColors: '#10b981', strokeWidth: 2, hover: { size: 6 } }
+            };
+
+            evolutionChart = new ApexCharts(document.querySelector("#chart-evolution"), options);
+            evolutionChart.render();
+        }
+
+        function renderMixTable() {
+            // Clonar y ordenar por tasa de mayor a menor
+            const sortedData = [...window.filteredData].sort((a,b) => b.tasa - a.tasa);
+            
+            const tableHtml = sortedData.map(r => `
+                <tr class="hover:bg-white transition-colors border-b border-slate-100 last:border-0">
+                    <td class="py-3 px-4 text-slate-500 font-medium">${formatDate(r.fecha)}</td>
+                    <td class="py-3 px-4">
+                        <div class="text-slate-800 font-semibold truncate max-w-xs" title="${r.campaña}">${r.campaña}</div>
+                        <div class="text-slate-400 text-xs truncate max-w-xs" title="${r.mensaje}">${r.mensaje.substring(0, 50)}...</div>
+                    </td>
+                    <td class="py-3 px-4 font-medium text-slate-700">${r.producto}</td>
+                    <td class="py-3 px-4"><span class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs border border-blue-100 font-semibold">${r.canal}</span></td>
+                    <td class="py-3 px-4"><span class="bg-purple-50 text-purple-600 px-2 py-1 rounded text-xs border border-purple-100 font-medium">${r.segmento}</span></td>
+                    <td class="py-3 px-4 text-right text-slate-600 font-medium">${formatNumber(r.envios)}</td>
+                    <td class="py-3 px-4 text-right font-bold text-accent">${formatPercent(r.tasa)}</td>
                 </tr>
             `).join('');
-
+            
             const tbody = document.getElementById('mix-table-body');
-            tbody.innerHTML = rowsHtml || `<tr><td colspan="8" class="py-8 text-center text-slate-500"><i class="fa-solid fa-inbox text-2xl mb-2 block"></i> No hay resultados para el mix de filtros seleccionado.</td></tr>`;
+            tbody.innerHTML = tableHtml || `<tr><td colspan="7" class="py-8 text-center text-slate-400 font-medium">No hay registros para la combinación de filtros seleccionada.</td></tr>`;
         }
+
     </script>
 </body>
 </html>
